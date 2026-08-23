@@ -1,0 +1,9 @@
+column,dtype,unique_values,missing_percent,high_missing
+ethnicity,str,6,1.5210493605050537,False
+gender,str,2,0.027258949112993792,False
+hospital_admit_source,str,15,23.343473662403365,False
+icu_admit_source,str,5,0.12212009202621221,False
+icu_stay_type,str,3,0.0,False
+icu_type,str,8,0.0,False
+apache_3j_bodysystem,str,11,1.8121749370318276,False
+apache_2_bodysystem,str,10,1.8121749370318276,False

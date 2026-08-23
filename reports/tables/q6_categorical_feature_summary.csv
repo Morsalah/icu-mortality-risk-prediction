@@ -1,0 +1,9 @@
+feature,unique_categories,missing_percent,rare_categories_count,encoding_candidate,encoding_reason
+hospital_admit_source,15,23.343473662403365,6,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+apache_3j_bodysystem,11,1.8121749370318276,2,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+apache_2_bodysystem,10,1.8121749370318276,2,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+icu_type,8,0.0,0,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+ethnicity,6,1.5210493605050537,1,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+icu_admit_source,5,0.12212009202621221,2,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+icu_stay_type,3,0.0,1,ONE-HOT ENCODING CANDIDATE,Feature has relatively low categorical cardinality.
+gender,2,0.027258949112993792,1,BINARY / ONE-HOT CANDIDATE,Feature contains two categories; simple binary or one-hot encoding is appropriate for later validation.
