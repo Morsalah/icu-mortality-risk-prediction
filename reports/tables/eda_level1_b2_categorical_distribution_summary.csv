@@ -1,0 +1,67 @@
+feature,category_value,count,percent
+ethnicity,Caucasian,70684,77.07086236411413
+ethnicity,African American,9547,10.409647487270071
+ethnicity,Other/Unknown,4374,4.769225736809394
+ethnicity,Hispanic,3796,4.138998833316978
+ethnicity,<MISSING>,1395,1.5210493605050537
+ethnicity,Asian,1129,1.2310141419427998
+ethnicity,Native American,788,0.8592020760415644
+gender,M,49469,53.93891814682761
+gender,F,42219,46.0338229040594
+gender,<MISSING>,25,0.027258949112993792
+hospital_admit_source,Emergency Department,36962,40.30181108457907
+hospital_admit_source,<MISSING>,21409,23.343473662403365
+hospital_admit_source,Operating Room,9787,10.671333398754811
+hospital_admit_source,Floor,8055,8.7828334042066
+hospital_admit_source,Direct Admit,6441,7.0229956494717225
+hospital_admit_source,Recovery Room,2896,3.157676665249201
+hospital_admit_source,Acute Care/Floor,1910,2.0825837122327258
+hospital_admit_source,Other Hospital,1641,1.7892774197769128
+hospital_admit_source,Step-Down Unit (SDU),1131,1.2331948578718392
+hospital_admit_source,PACU,1017,1.1088940499165876
+hospital_admit_source,Other ICU,233,0.2540534057331022
+hospital_admit_source,Chest Pain Center,134,0.14610796724564673
+hospital_admit_source,ICU to SDU,45,0.04906610840338883
+hospital_admit_source,ICU,35,0.038162528758191316
+hospital_admit_source,Observation,10,0.010903579645197519
+hospital_admit_source,Other,7,0.007632505751638263
+icu_admit_source,Accident & Emergency,54060,58.94475156193778
+icu_admit_source,Operating Room / Recovery,18713,20.403868590058117
+icu_admit_source,Floor,15611,17.021578184117846
+icu_admit_source,Other Hospital,2358,2.5710640803375746
+icu_admit_source,Other ICU,859,0.9366174915224669
+icu_admit_source,<MISSING>,112,0.12212009202621221
+icu_stay_type,admit,86183,93.97032045620577
+icu_stay_type,transfer,4970,5.419079083663167
+icu_stay_type,readmit,560,0.6106004601310611
+icu_type,Med-Surg ICU,50586,55.156847993196166
+icu_type,MICU,7695,8.39030453697949
+icu_type,Neuro ICU,7675,8.368497377689096
+icu_type,CCU-CTICU,7156,7.8026015941033435
+icu_type,SICU,5209,5.679674637183387
+icu_type,Cardiac ICU,4776,5.207549638546335
+icu_type,CSICU,4613,5.029821290329616
+icu_type,CTICU,4003,4.364702931972567
+apache_3j_bodysystem,Cardiovascular,29999,32.70964857762804
+apache_3j_bodysystem,Neurological,11896,12.970898345926967
+apache_3j_bodysystem,Sepsis,11740,12.800802503461886
+apache_3j_bodysystem,Respiratory,11609,12.6579656101098
+apache_3j_bodysystem,Gastrointestinal,9026,9.84157098775528
+apache_3j_bodysystem,Metabolic,7650,8.341238428576101
+apache_3j_bodysystem,Trauma,3842,4.189155299684886
+apache_3j_bodysystem,Genitourinary,2172,2.368257498936901
+apache_3j_bodysystem,<MISSING>,1662,1.8121749370318276
+apache_3j_bodysystem,Musculoskeletal/Skin,1166,1.2713573866300307
+apache_3j_bodysystem,Hematological,638,0.6956483813636016
+apache_3j_bodysystem,Gynecological,313,0.34128204289468234
+apache_2_bodysystem,Cardiovascular,38816,42.323334750798686
+apache_2_bodysystem,Neurologic,11896,12.970898345926967
+apache_2_bodysystem,Respiratory,11609,12.6579656101098
+apache_2_bodysystem,Gastrointestinal,9026,9.84157098775528
+apache_2_bodysystem,Metabolic,7650,8.341238428576101
+apache_2_bodysystem,Trauma,3842,4.189155299684886
+apache_2_bodysystem,Undefined diagnoses,3768,4.108468810310425
+apache_2_bodysystem,Renal/Genitourinary,2460,2.6822805927185898
+apache_2_bodysystem,<MISSING>,1662,1.8121749370318276
+apache_2_bodysystem,Haematologic,638,0.6956483813636016
+apache_2_bodysystem,Undefined Diagnoses,346,0.37726385572383414

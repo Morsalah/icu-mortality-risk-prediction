@@ -13,6 +13,10 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 SUMMARY_OUTPUT_PATH = (
@@ -25,8 +29,111 @@ DETAIL_OUTPUT_PATH = (
     / "eda_level1_b4_categorical_rare_categories_detail.csv"
 )
 
+DICTIONARY_PATH = (
+    Path("data")
+    / "reference"
+    / "WiDS Datathon 2020 Dictionary.csv"
+)
+
+
+# ---------------------------------------------------------------------
+# Working EDA threshold
+# ---------------------------------------------------------------------
 
 RARE_CATEGORY_THRESHOLD_PERCENT = 1.0
+
+
+# ---------------------------------------------------------------------
+# Feature dictionary
+# ---------------------------------------------------------------------
+
+def load_feature_dictionary() -> dict[
+    str,
+    dict[str, str],
+]:
+    """
+    Load categorical feature metadata from the WiDS data dictionary.
+
+    Mapping:
+
+        Variable Name ->
+        {
+            "description": ...,
+            "data_type": ...
+        }
+    """
+
+    if not DICTIONARY_PATH.exists():
+
+        raise FileNotFoundError(
+            "WiDS data dictionary was not found: "
+            f"{DICTIONARY_PATH.resolve()}"
+        )
+
+    dictionary = pd.read_csv(
+        DICTIONARY_PATH
+    )
+
+    required_columns = {
+        "Variable Name",
+        "Description",
+        "Data Type",
+    }
+
+    missing_columns = (
+        required_columns
+        - set(dictionary.columns)
+    )
+
+    if missing_columns:
+
+        raise ValueError(
+            "Dictionary is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ] = {}
+
+    for _, row in dictionary.iterrows():
+
+        feature = row[
+            "Variable Name"
+        ]
+
+        if pd.isna(feature):
+            continue
+
+        description = (
+            ""
+            if pd.isna(
+                row["Description"]
+            )
+            else str(
+                row["Description"]
+            )
+        )
+
+        data_type = (
+            ""
+            if pd.isna(
+                row["Data Type"]
+            )
+            else str(
+                row["Data Type"]
+            )
+        )
+
+        feature_metadata[
+            str(feature)
+        ] = {
+            "description": description,
+            "data_type": data_type,
+        }
+
+    return feature_metadata
 
 
 # ---------------------------------------------------------------------
@@ -68,6 +175,10 @@ def get_categorical_features(
 def analyze_rare_categories(
     dataframe: pd.DataFrame,
     feature: str,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> tuple[
     dict[str, object],
     pd.DataFrame,
@@ -79,6 +190,10 @@ def analyze_rare_categories(
 
     A category is considered rare when its frequency among observed
     values is below RARE_CATEGORY_THRESHOLD_PERCENT.
+
+    The threshold is a working EDA threshold only. A rare category
+    is not automatically considered unimportant and should not be
+    automatically merged or removed.
     """
 
     series = dataframe[
@@ -90,42 +205,31 @@ def analyze_rare_categories(
         .dropna()
     )
 
-    total_count = len(
-        series
-    )
-
-    observed_count = len(
-        observed
-    )
-
-    missing_count = int(
-        series.isna()
-        .sum()
-    )
-
     missing_percent = (
-        missing_count
-        / total_count
+        series.isna()
+        .mean()
         * 100
-        if total_count > 0
-        else float("nan")
     )
 
     unique_categories = int(
         observed.nunique()
     )
 
+    # -------------------------------------------------------------
+    # No observed values
+    # -------------------------------------------------------------
+
     if observed.empty:
 
         summary = {
             "feature": feature,
-            "observed_count": observed_count,
+            "dictionary_data_type": "",
+            "feature_description": "",
             "missing_percent": missing_percent,
             "unique_categories": unique_categories,
             "rare_categories_count": 0,
-            "rare_observations_count": 0,
+            "rare_categories_percent": float("nan"),
             "rare_observations_percent": float("nan"),
-            "has_rare_categories": False,
         }
 
         detail = pd.DataFrame(
@@ -142,6 +246,10 @@ def analyze_rare_categories(
             detail,
         )
 
+    # -------------------------------------------------------------
+    # Category frequencies
+    # -------------------------------------------------------------
+
     category_counts = (
         observed
         .value_counts()
@@ -149,9 +257,13 @@ def analyze_rare_categories(
 
     category_percentages = (
         category_counts
-        / observed_count
+        / len(observed)
         * 100
     )
+
+    # -------------------------------------------------------------
+    # Identify rare categories
+    # -------------------------------------------------------------
 
     rare_mask = (
         category_percentages
@@ -176,38 +288,100 @@ def analyze_rare_categories(
         )
     )
 
-    rare_observations_count = int(
-        rare_counts.sum()
+    # -------------------------------------------------------------
+    # Percentage of category TYPES that are rare
+    # -------------------------------------------------------------
+
+    rare_categories_percent = (
+        rare_categories_count
+        / unique_categories
+        * 100
+        if unique_categories > 0
+        else float("nan")
     )
 
+    # -------------------------------------------------------------
+    # Percentage of OBSERVATIONS belonging to rare categories
+    # -------------------------------------------------------------
+
     rare_observations_percent = (
-        rare_observations_count
-        / observed_count
+        rare_counts.sum()
+        / len(observed)
         * 100
     )
 
-    has_rare_categories = bool(
-        rare_categories_count > 0
-    )
+    # -------------------------------------------------------------
+    # Dictionary metadata
+    # -------------------------------------------------------------
+
+    dictionary_data_type = ""
+    feature_description = ""
+
+    # Only display dictionary information when rare categories exist.
+    if rare_categories_count > 0:
+
+        metadata = (
+            feature_metadata.get(
+                feature
+            )
+        )
+
+        if metadata is None:
+
+            dictionary_data_type = (
+                "Data type not found in dictionary"
+            )
+
+            feature_description = (
+                "Description not found in dictionary"
+            )
+
+        else:
+
+            dictionary_data_type = (
+                metadata[
+                    "data_type"
+                ]
+            )
+
+            feature_description = (
+                metadata[
+                    "description"
+                ]
+            )
+
+    # -------------------------------------------------------------
+    # Summary row
+    # -------------------------------------------------------------
 
     summary = {
         "feature": feature,
-        "observed_count": observed_count,
-        "missing_percent": missing_percent,
-        "unique_categories": unique_categories,
+        "dictionary_data_type": (
+            dictionary_data_type
+        ),
+        "feature_description": (
+            feature_description
+        ),
+        "missing_percent": (
+            missing_percent
+        ),
+        "unique_categories": (
+            unique_categories
+        ),
         "rare_categories_count": (
             rare_categories_count
         ),
-        "rare_observations_count": (
-            rare_observations_count
+        "rare_categories_percent": (
+            rare_categories_percent
         ),
         "rare_observations_percent": (
             rare_observations_percent
         ),
-        "has_rare_categories": (
-            has_rare_categories
-        ),
     }
+
+    # -------------------------------------------------------------
+    # Detail table
+    # -------------------------------------------------------------
 
     detail = pd.DataFrame(
         {
@@ -236,6 +410,10 @@ def analyze_rare_categories(
 
 def build_rare_category_tables(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
@@ -266,6 +444,9 @@ def build_rare_category_tables(
         ) = analyze_rare_categories(
             dataframe=dataframe,
             feature=feature,
+            feature_metadata=(
+                feature_metadata
+            ),
         )
 
         summary_rows.append(
@@ -273,9 +454,14 @@ def build_rare_category_tables(
         )
 
         if not detail.empty:
+
             detail_tables.append(
                 detail
             )
+
+    # -------------------------------------------------------------
+    # Summary
+    # -------------------------------------------------------------
 
     summary_results = pd.DataFrame(
         summary_rows
@@ -286,13 +472,24 @@ def build_rare_category_tables(
         summary_results = (
             summary_results
             .sort_values(
-                by="rare_observations_percent",
-                ascending=False,
+                by=[
+                    "rare_observations_percent",
+                    "rare_categories_percent",
+                ],
+                ascending=[
+                    False,
+                    False,
+                ],
+                na_position="last",
             )
             .reset_index(
                 drop=True
             )
         )
+
+    # -------------------------------------------------------------
+    # Detail
+    # -------------------------------------------------------------
 
     if detail_tables:
 
@@ -341,7 +538,9 @@ def save_results(
     summary_results: pd.DataFrame,
     detail_results: pd.DataFrame,
 ) -> None:
-    """Save B.4 summary and detail tables."""
+    """
+    Save B.4 summary and detail tables.
+    """
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -363,13 +562,17 @@ def print_results(
     summary_results: pd.DataFrame,
     detail_results: pd.DataFrame,
 ) -> None:
-    """Print B.4 rare-category results."""
+    """
+    Print B.4 rare-category results.
+    """
 
-    print("=" * 140)
+    print("=" * 170)
+
     print(
         "EDA LEVEL 1 — B.4 CATEGORICAL RARE CATEGORIES"
     )
-    print("=" * 140)
+
+    print("=" * 170)
 
     print(
         f"Categorical features investigated: "
@@ -377,15 +580,22 @@ def print_results(
     )
 
     print(
-        f"Rare-category threshold: "
-        f"< {RARE_CATEGORY_THRESHOLD_PERCENT:.2f}%"
+        f"Working rare-category threshold: "
+        f"< {RARE_CATEGORY_THRESHOLD_PERCENT:.2f}% "
+        f"of observed values"
     )
 
-    print("\n" + "=" * 140)
+    # -------------------------------------------------------------
+    # Summary table
+    # -------------------------------------------------------------
+
+    print("\n" + "=" * 170)
+
     print(
         "RARE CATEGORY SUMMARY"
     )
-    print("=" * 140)
+
+    print("=" * 170)
 
     if summary_results.empty:
 
@@ -404,11 +614,17 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 140)
+    # -------------------------------------------------------------
+    # Detail table
+    # -------------------------------------------------------------
+
+    print("\n" + "=" * 170)
+
     print(
         "RARE CATEGORY DETAILS"
     )
-    print("=" * 140)
+
+    print("=" * 170)
 
     if detail_results.empty:
 
@@ -427,24 +643,35 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 140)
+    # -------------------------------------------------------------
+    # Dataset-level summary
+    # -------------------------------------------------------------
+
+    print("\n" + "=" * 170)
+
     print(
         "SUMMARY"
     )
-    print("=" * 140)
+
+    print("=" * 170)
 
     if not summary_results.empty:
 
         features_with_rare = int(
-            summary_results[
-                "has_rare_categories"
-            ].sum()
+            (
+                summary_results[
+                    "rare_categories_count"
+                ]
+                > 0
+            )
+            .sum()
         )
 
         total_rare_categories = int(
             summary_results[
                 "rare_categories_count"
-            ].sum()
+            ]
+            .sum()
         )
 
         print(
@@ -457,11 +684,17 @@ def print_results(
             f"{total_rare_categories}"
         )
 
-    print("\n" + "=" * 140)
+    # -------------------------------------------------------------
+    # Saved artifacts
+    # -------------------------------------------------------------
+
+    print("\n" + "=" * 170)
+
     print(
         "ARTIFACTS SAVED"
     )
-    print("=" * 140)
+
+    print("=" * 170)
 
     print(
         SUMMARY_OUTPUT_PATH
@@ -480,17 +713,26 @@ def run_b4_categorical_rare_categories() -> tuple[
     pd.DataFrame,
     pd.DataFrame,
 ]:
-    """Run EDA Level 1 B.4."""
+    """
+    Run EDA Level 1 B.4.
+    """
 
     dataframe = (
         load_training_data()
+    )
+
+    feature_metadata = (
+        load_feature_dictionary()
     )
 
     (
         summary_results,
         detail_results,
     ) = build_rare_category_tables(
-        dataframe
+        dataframe=dataframe,
+        feature_metadata=(
+            feature_metadata
+        ),
     )
 
     save_results(

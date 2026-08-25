@@ -14,6 +14,10 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 REPORTS_FIGURES_DIR = (
@@ -28,6 +32,12 @@ SUMMARY_OUTPUT_PATH = (
     / "eda_level1_a1_numeric_distribution_summary.csv"
 )
 
+DICTIONARY_PATH = (
+    Path("data")
+    / "reference"
+    / "WiDS Datathon 2020 Dictionary.csv"
+)
+
 
 KNOWN_IDENTIFIER_COLUMNS = {
     "encounter_id",
@@ -35,11 +45,106 @@ KNOWN_IDENTIFIER_COLUMNS = {
 }
 
 
+# ---------------------------------------------------------------------
+# Review thresholds
+# ---------------------------------------------------------------------
+
+LOW_UNIQUE_VALUES_THRESHOLD = 10
+
+RELATIVE_DIFFERENCE_NOTICEABLE = 10.0
+RELATIVE_DIFFERENCE_HIGH = 20.0
+
+SKEWNESS_NOTICEABLE = 0.5
+SKEWNESS_HIGH = 1.0
+SKEWNESS_VERY_HIGH = 2.0
+
+
+# ---------------------------------------------------------------------
+# Feature dictionary
+# ---------------------------------------------------------------------
+
+def load_feature_dictionary() -> dict[str, dict[str, str]]:
+    """
+    Load feature metadata from the WiDS data dictionary.
+
+    Mapping:
+        Variable Name ->
+        {
+            "description": ...,
+            "data_type": ...
+        }
+    """
+
+    if not DICTIONARY_PATH.exists():
+        raise FileNotFoundError(
+            "WiDS data dictionary was not found: "
+            f"{DICTIONARY_PATH.resolve()}"
+        )
+
+    dictionary = pd.read_csv(
+        DICTIONARY_PATH
+    )
+
+    required_columns = {
+        "Variable Name",
+        "Description",
+        "Data Type",
+    }
+
+    missing_columns = (
+        required_columns
+        - set(dictionary.columns)
+    )
+
+    if missing_columns:
+        raise ValueError(
+            "Dictionary is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ] = {}
+
+    for _, row in dictionary.iterrows():
+
+        feature = row["Variable Name"]
+
+        if pd.isna(feature):
+            continue
+
+        description = (
+            ""
+            if pd.isna(row["Description"])
+            else str(row["Description"])
+        )
+
+        data_type = (
+            ""
+            if pd.isna(row["Data Type"])
+            else str(row["Data Type"])
+        )
+
+        feature_metadata[
+            str(feature)
+        ] = {
+            "description": description,
+            "data_type": data_type,
+        }
+
+    return feature_metadata
+
+
+# ---------------------------------------------------------------------
+# Numeric feature selection
+# ---------------------------------------------------------------------
+
 def get_numeric_features(
     dataframe: pd.DataFrame,
 ) -> list[str]:
     """
-    Return numeric predictor features for A.1 distribution analysis.
+    Return numeric predictor features.
 
     Target and known identifiers are excluded.
     """
@@ -59,18 +164,199 @@ def get_numeric_features(
         ):
             continue
 
-        features.append(
-            feature
-        )
+        features.append(feature)
 
     return features
 
 
+# ---------------------------------------------------------------------
+# Relative difference
+# ---------------------------------------------------------------------
+
+def calculate_relative_difference(
+    mean: float,
+    median: float,
+) -> float:
+    """
+    Calculate relative difference between mean and median.
+
+        |mean - median|
+        ------------------------- * 100
+        (|mean| + |median|) / 2
+    """
+
+    if pd.isna(mean) or pd.isna(median):
+        return float("nan")
+
+    denominator = (
+        abs(mean)
+        + abs(median)
+    ) / 2
+
+    if denominator == 0:
+        return 0.0
+
+    return (
+        abs(mean - median)
+        / denominator
+        * 100
+    )
+
+
+# ---------------------------------------------------------------------
+# Review / triage
+# ---------------------------------------------------------------------
+
+def calculate_review_information(
+    unique_values: int,
+    relative_difference_percent: float,
+    skewness: float,
+) -> tuple[int, str, str]:
+    """
+    Calculate A.1 review score, priority and reason.
+
+    Low-cardinality numeric features are treated separately because
+    skewness and mean/median behavior may not have the same
+    interpretation as for continuous numeric variables.
+    """
+
+    score = 0
+    reasons: list[str] = []
+
+    # --------------------------------------------------------------
+    # Low-cardinality numeric feature
+    # --------------------------------------------------------------
+
+    if unique_values < LOW_UNIQUE_VALUES_THRESHOLD:
+
+        reasons.append(
+            "LOW_UNIQUE_VALUES"
+        )
+
+        # We want to review its real meaning / data type,
+        # rather than rank it using continuous-distribution metrics.
+        score = 1
+
+    else:
+
+        # ----------------------------------------------------------
+        # Relative difference
+        # ----------------------------------------------------------
+
+        if not pd.isna(
+            relative_difference_percent
+        ):
+
+            if (
+                relative_difference_percent
+                > RELATIVE_DIFFERENCE_HIGH
+            ):
+
+                score += 2
+
+                reasons.append(
+                    "LARGE_MEAN_MEDIAN_DIFFERENCE"
+                )
+
+            elif (
+                relative_difference_percent
+                >= RELATIVE_DIFFERENCE_NOTICEABLE
+            ):
+
+                score += 1
+
+                reasons.append(
+                    "NOTICEABLE_MEAN_MEDIAN_DIFFERENCE"
+                )
+
+        # ----------------------------------------------------------
+        # Skewness
+        # ----------------------------------------------------------
+
+        if not pd.isna(skewness):
+
+            absolute_skewness = abs(
+                skewness
+            )
+
+            if (
+                absolute_skewness
+                > SKEWNESS_VERY_HIGH
+            ):
+
+                score += 3
+
+                reasons.append(
+                    "VERY_HIGH_SKEWNESS"
+                )
+
+            elif (
+                absolute_skewness
+                > SKEWNESS_HIGH
+            ):
+
+                score += 2
+
+                reasons.append(
+                    "HIGH_SKEWNESS"
+                )
+
+            elif (
+                absolute_skewness
+                >= SKEWNESS_NOTICEABLE
+            ):
+
+                score += 1
+
+                reasons.append(
+                    "NOTICEABLE_SKEWNESS"
+                )
+
+    # --------------------------------------------------------------
+    # Priority
+    # --------------------------------------------------------------
+
+    if score == 0:
+
+        priority = "NO_REVIEW"
+
+    elif score == 1:
+
+        priority = "LOW"
+
+    elif score <= 3:
+
+        priority = "MEDIUM"
+
+    else:
+
+        priority = "HIGH"
+
+    review_reason = (
+        " | ".join(reasons)
+        if reasons
+        else ""
+    )
+
+    return (
+        score,
+        priority,
+        review_reason,
+    )
+
+
+# ---------------------------------------------------------------------
+# Feature analysis
+# ---------------------------------------------------------------------
+
 def analyze_numeric_distribution(
     dataframe: pd.DataFrame,
     feature: str,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> dict[str, object]:
-    """Calculate distribution statistics for one numeric feature."""
 
     series = dataframe[
         feature
@@ -92,29 +378,115 @@ def analyze_numeric_distribution(
     )
 
     if observed.empty:
+
         return {
             "feature": feature,
+            "review_score": 0,
+            "review_priority": "NO_REVIEW",
+            "review_reason": "",
+            "dictionary_data_type": "",
+            "feature_description": "",
             "missing_percent": missing_percent,
             "unique_values": unique_values,
             "mean": float("nan"),
             "median": float("nan"),
+            "relative_difference_percent": float("nan"),
             "skewness": float("nan"),
         }
 
+    mean = float(
+        observed.mean()
+    )
+
+    median = float(
+        observed.median()
+    )
+
+    skewness = float(
+        observed.skew()
+    )
+
+    relative_difference = (
+        calculate_relative_difference(
+            mean=mean,
+            median=median,
+        )
+    )
+
+    (
+        review_score,
+        review_priority,
+        review_reason,
+    ) = calculate_review_information(
+        unique_values=unique_values,
+        relative_difference_percent=(
+            relative_difference
+        ),
+        skewness=skewness,
+    )
+
+    feature_description = ""
+    dictionary_data_type = ""
+
+    if review_score > 0:
+
+        metadata = (
+            feature_metadata.get(feature)
+        )
+
+        if metadata is None:
+
+            feature_description = (
+                "Description not found in dictionary"
+            )
+
+            dictionary_data_type = (
+                "Data type not found in dictionary"
+            )
+
+        else:
+
+            feature_description = (
+                metadata["description"]
+            )
+
+            dictionary_data_type = (
+                metadata["data_type"]
+            )
+
     return {
         "feature": feature,
+        "review_score": review_score,
+        "review_priority": review_priority,
+        "review_reason": review_reason,
+        "dictionary_data_type": (
+            dictionary_data_type
+        ),
+        "feature_description": (
+            feature_description
+        ),
         "missing_percent": missing_percent,
         "unique_values": unique_values,
-        "mean": observed.mean(),
-        "median": observed.median(),
-        "skewness": observed.skew(),
+        "mean": mean,
+        "median": median,
+        "relative_difference_percent": (
+            relative_difference
+        ),
+        "skewness": skewness,
     }
 
 
+# ---------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------
+
 def build_distribution_summary(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> pd.DataFrame:
-    """Build A.1 distribution summary for all numeric features."""
 
     features = (
         get_numeric_features(
@@ -122,9 +494,7 @@ def build_distribution_summary(
         )
     )
 
-    rows: list[
-        dict[str, object]
-    ] = []
+    rows = []
 
     for feature in features:
 
@@ -132,6 +502,7 @@ def build_distribution_summary(
             analyze_numeric_distribution(
                 dataframe=dataframe,
                 feature=feature,
+                feature_metadata=feature_metadata,
             )
         )
 
@@ -142,25 +513,52 @@ def build_distribution_summary(
     if results.empty:
         return results
 
-    return (
+    # Temporary value used only for secondary sorting.
+    results["_abs_skewness"] = (
+        results[
+            "skewness"
+        ].abs()
+    )
+
+    results = (
         results
         .sort_values(
-            by="feature"
+            by=[
+                "review_score",
+                "_abs_skewness",
+            ],
+            ascending=[
+                False,
+                False,
+            ],
+            na_position="last",
+        )
+        .drop(
+            columns=[
+                "_abs_skewness"
+            ]
         )
         .reset_index(
             drop=True
         )
     )
 
+    return results
+
+
+# ---------------------------------------------------------------------
+# Histograms
+# ---------------------------------------------------------------------
 
 def save_histogram(
     dataframe: pd.DataFrame,
     feature: str,
 ) -> None:
-    """Save histogram for one numeric feature."""
 
     observed = (
-        dataframe[feature]
+        dataframe[
+            feature
+        ]
         .dropna()
     )
 
@@ -179,7 +577,6 @@ def save_histogram(
     axis.hist(
         observed,
         bins=30,
-        edgecolor="black",
     )
 
     axis.set_title(
@@ -214,7 +611,6 @@ def save_histogram(
 def save_all_histograms(
     dataframe: pd.DataFrame,
 ) -> None:
-    """Save histograms for all numeric predictor features."""
 
     features = (
         get_numeric_features(
@@ -230,10 +626,13 @@ def save_all_histograms(
         )
 
 
+# ---------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------
+
 def save_summary(
     results: pd.DataFrame,
 ) -> None:
-    """Save A.1 distribution summary."""
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -249,32 +648,60 @@ def save_summary(
 def print_results(
     results: pd.DataFrame,
 ) -> None:
-    """Print A.1 numeric distribution results."""
 
-    print("=" * 120)
+    print("=" * 190)
+
     print(
         "EDA LEVEL 1 — A.1 NUMERIC FEATURE DISTRIBUTION"
     )
-    print("=" * 120)
+
+    print("=" * 190)
 
     print(
         f"Numeric features investigated: "
         f"{len(results)}"
     )
 
-    print("\n" + "=" * 120)
-    print(
-        "DISTRIBUTION SUMMARY"
-    )
-    print("=" * 120)
+    if not results.empty:
 
-    if results.empty:
+        print("\nREVIEW PRIORITY COUNTS")
+
         print(
-            "No numeric features were found."
+            results[
+                "review_priority"
+            ]
+            .value_counts()
+            .to_string()
         )
-    else:
+
         print(
-            results.to_string(
+            "\nTOP FEATURES FOR MANUAL REVIEW"
+        )
+
+        review_features = (
+            results[
+                results[
+                    "review_score"
+                ] > 0
+            ]
+        )
+
+        print(
+            review_features[
+                [
+                    "feature",
+                    "review_score",
+                    "review_priority",
+                    "review_reason",
+                    "dictionary_data_type",
+                    "unique_values",
+                    "relative_difference_percent",
+                    "skewness",
+                    "feature_description",
+                ]
+            ]
+            .head(20)
+            .to_string(
                 index=False,
                 float_format=lambda value: (
                     f"{value:.2f}"
@@ -282,11 +709,7 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 120)
-    print(
-        "ARTIFACTS SAVED"
-    )
-    print("=" * 120)
+    print("\nARTIFACTS SAVED")
 
     print(
         SUMMARY_OUTPUT_PATH
@@ -297,16 +720,24 @@ def print_results(
     )
 
 
+# ---------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------
+
 def run_a1_numeric_distribution() -> pd.DataFrame:
-    """Run EDA Level 1 A.1."""
 
     dataframe = (
         load_training_data()
     )
 
+    feature_metadata = (
+        load_feature_dictionary()
+    )
+
     results = (
         build_distribution_summary(
-            dataframe
+            dataframe=dataframe,
+            feature_metadata=feature_metadata,
         )
     )
 

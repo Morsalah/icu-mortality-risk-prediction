@@ -13,6 +13,10 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 SUMMARY_OUTPUT_PATH = (
@@ -20,11 +24,124 @@ SUMMARY_OUTPUT_PATH = (
     / "eda_level1_a3_numeric_suspicious_values_summary.csv"
 )
 
+DICTIONARY_PATH = (
+    Path("data")
+    / "reference"
+    / "WiDS Datathon 2020 Dictionary.csv"
+)
+
 
 KNOWN_IDENTIFIER_COLUMNS = {
     "encounter_id",
     "patient_id",
 }
+
+
+LOW_UNIQUE_VALUES_THRESHOLD = 10
+
+
+# ---------------------------------------------------------------------
+# Feature dictionary
+# ---------------------------------------------------------------------
+
+def load_feature_dictionary() -> dict[
+    str,
+    dict[str, str],
+]:
+    """
+    Load feature metadata from the WiDS data dictionary.
+
+    Mapping:
+
+        Variable Name ->
+        {
+            "description": ...,
+            "data_type": ...,
+            "unit_of_measure": ...
+        }
+    """
+
+    if not DICTIONARY_PATH.exists():
+        raise FileNotFoundError(
+            "WiDS data dictionary was not found: "
+            f"{DICTIONARY_PATH.resolve()}"
+        )
+
+    dictionary = pd.read_csv(
+        DICTIONARY_PATH
+    )
+
+    required_columns = {
+        "Variable Name",
+        "Description",
+        "Data Type",
+        "Unit of Measure",
+    }
+
+    missing_columns = (
+        required_columns
+        - set(dictionary.columns)
+    )
+
+    if missing_columns:
+        raise ValueError(
+            "Dictionary is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ] = {}
+
+    for _, row in dictionary.iterrows():
+
+        feature = row[
+            "Variable Name"
+        ]
+
+        if pd.isna(feature):
+            continue
+
+        description = (
+            ""
+            if pd.isna(
+                row["Description"]
+            )
+            else str(
+                row["Description"]
+            )
+        )
+
+        data_type = (
+            ""
+            if pd.isna(
+                row["Data Type"]
+            )
+            else str(
+                row["Data Type"]
+            )
+        )
+
+        unit_of_measure = (
+            ""
+            if pd.isna(
+                row["Unit of Measure"]
+            )
+            else str(
+                row["Unit of Measure"]
+            )
+        )
+
+        feature_metadata[
+            str(feature)
+        ] = {
+            "description": description,
+            "data_type": data_type,
+            "unit_of_measure": unit_of_measure,
+        }
+
+    return feature_metadata
 
 
 # ---------------------------------------------------------------------
@@ -63,18 +180,77 @@ def get_numeric_features(
 
 
 # ---------------------------------------------------------------------
+# Review policy
+# ---------------------------------------------------------------------
+
+def assign_review_reason(
+    unique_values: int,
+    negative_values_percent: float,
+    zero_values_percent: float,
+) -> str:
+    """
+    Determine why a numeric feature requires A.3 review.
+
+    A review flag does not mean the values are invalid.
+    It only indicates that the feature deserves inspection
+    using its clinical/logical meaning and data dictionary.
+    """
+
+    reasons: list[str] = []
+
+    if unique_values < LOW_UNIQUE_VALUES_THRESHOLD:
+        reasons.append(
+            "LOW_UNIQUE_VALUES"
+        )
+
+    if (
+        not pd.isna(
+            negative_values_percent
+        )
+        and
+        negative_values_percent > 0
+    ):
+        reasons.append(
+            "HAS_NEGATIVE_VALUES"
+        )
+
+    if (
+        not pd.isna(
+            zero_values_percent
+        )
+        and
+        zero_values_percent > 0
+    ):
+        reasons.append(
+            "HAS_ZERO_VALUES"
+        )
+
+    return (
+        " | ".join(
+            reasons
+        )
+        if reasons
+        else ""
+    )
+
+
+# ---------------------------------------------------------------------
 # Suspicious-value analysis
 # ---------------------------------------------------------------------
 
 def analyze_numeric_range(
     dataframe: pd.DataFrame,
     feature: str,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> dict[str, object]:
     """
     Analyze the observed range of one numeric feature.
 
-    This function describes potentially suspicious values but does not
-    automatically decide whether a value is medically invalid.
+    The function identifies values that may deserve manual review,
+    but it does not automatically label them as medically invalid.
     """
 
     series = dataframe[
@@ -92,10 +268,6 @@ def analyze_numeric_range(
         * 100
     )
 
-    observed_count = len(
-        observed
-    )
-
     unique_values = int(
         observed.nunique()
     )
@@ -104,71 +276,126 @@ def analyze_numeric_range(
 
         return {
             "feature": feature,
+            "review_reason": "NO_OBSERVED_VALUES",
+            "dictionary_data_type": "",
+            "unit_of_measure": "",
+            "feature_description": "",
             "missing_percent": missing_percent,
-            "observed_count": observed_count,
             "unique_values": unique_values,
             "min_value": float("nan"),
             "max_value": float("nan"),
-            "range": float("nan"),
-            "negative_values_count": 0,
             "negative_values_percent": float("nan"),
-            "zero_values_count": 0,
             "zero_values_percent": float("nan"),
         }
 
-    min_value = (
+    min_value = float(
         observed.min()
     )
 
-    max_value = (
+    max_value = float(
         observed.max()
     )
 
-    value_range = (
-        max_value
-        - min_value
-    )
-
-    negative_values_count = int(
-        (
-            observed < 0
-        ).sum()
-    )
-
     negative_values_percent = (
-        negative_values_count
-        / observed_count
+        (observed < 0)
+        .mean()
         * 100
-    )
-
-    zero_values_count = int(
-        (
-            observed == 0
-        ).sum()
     )
 
     zero_values_percent = (
-        zero_values_count
-        / observed_count
+        (observed == 0)
+        .mean()
         * 100
     )
 
+    review_reason = (
+        assign_review_reason(
+            unique_values=unique_values,
+            negative_values_percent=(
+                negative_values_percent
+            ),
+            zero_values_percent=(
+                zero_values_percent
+            ),
+        )
+    )
+
+    dictionary_data_type = ""
+    unit_of_measure = ""
+    feature_description = ""
+
+    # Only display dictionary metadata for features
+    # that require manual review.
+    if review_reason:
+
+        metadata = (
+            feature_metadata.get(
+                feature
+            )
+        )
+
+        if metadata is None:
+
+            dictionary_data_type = (
+                "Data type not found in dictionary"
+            )
+
+            unit_of_measure = (
+                "Unit not found in dictionary"
+            )
+
+            feature_description = (
+                "Description not found in dictionary"
+            )
+
+        else:
+
+            dictionary_data_type = (
+                metadata[
+                    "data_type"
+                ]
+            )
+
+            unit_of_measure = (
+                metadata[
+                    "unit_of_measure"
+                ]
+            )
+
+            feature_description = (
+                metadata[
+                    "description"
+                ]
+            )
+
     return {
         "feature": feature,
-        "missing_percent": missing_percent,
-        "observed_count": observed_count,
-        "unique_values": unique_values,
-        "min_value": min_value,
-        "max_value": max_value,
-        "range": value_range,
-        "negative_values_count": (
-            negative_values_count
+        "review_reason": (
+            review_reason
+        ),
+        "dictionary_data_type": (
+            dictionary_data_type
+        ),
+        "unit_of_measure": (
+            unit_of_measure
+        ),
+        "feature_description": (
+            feature_description
+        ),
+        "missing_percent": (
+            missing_percent
+        ),
+        "unique_values": (
+            unique_values
+        ),
+        "min_value": (
+            min_value
+        ),
+        "max_value": (
+            max_value
         ),
         "negative_values_percent": (
             negative_values_percent
-        ),
-        "zero_values_count": (
-            zero_values_count
         ),
         "zero_values_percent": (
             zero_values_percent
@@ -182,8 +409,14 @@ def analyze_numeric_range(
 
 def build_range_summary(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> pd.DataFrame:
-    """Build A.3 range summary for all numeric predictor features."""
+    """
+    Build A.3 range summary for all numeric predictor features.
+    """
 
     features = (
         get_numeric_features(
@@ -201,6 +434,9 @@ def build_range_summary(
             analyze_numeric_range(
                 dataframe=dataframe,
                 feature=feature,
+                feature_metadata=(
+                    feature_metadata
+                ),
             )
         )
 
@@ -211,15 +447,40 @@ def build_range_summary(
     if results.empty:
         return results
 
-    return (
+    # Put features that require review first.
+    results = (
         results
+        .assign(
+            _requires_review=(
+                results[
+                    "review_reason"
+                ] != ""
+            )
+        )
         .sort_values(
-            by="feature"
+            by=[
+                "_requires_review",
+                "negative_values_percent",
+                "zero_values_percent",
+            ],
+            ascending=[
+                False,
+                False,
+                False,
+            ],
+            na_position="last",
+        )
+        .drop(
+            columns=[
+                "_requires_review"
+            ]
         )
         .reset_index(
             drop=True
         )
     )
+
+    return results
 
 
 # ---------------------------------------------------------------------
@@ -229,7 +490,9 @@ def build_range_summary(
 def save_summary(
     results: pd.DataFrame,
 ) -> None:
-    """Save A.3 suspicious-value / range summary."""
+    """
+    Save A.3 suspicious-value / range summary.
+    """
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -245,24 +508,45 @@ def save_summary(
 def print_results(
     results: pd.DataFrame,
 ) -> None:
-    """Print A.3 suspicious-value / range results."""
+    """
+    Print A.3 suspicious-value / range results.
+    """
 
-    print("=" * 150)
+    print("=" * 190)
+
     print(
         "EDA LEVEL 1 — A.3 NUMERIC SUSPICIOUS VALUES / RANGE"
     )
-    print("=" * 150)
+
+    print("=" * 190)
 
     print(
         f"Numeric features investigated: "
         f"{len(results)}"
     )
 
-    print("\n" + "=" * 150)
+    if not results.empty:
+
+        review_features = (
+            results[
+                results[
+                    "review_reason"
+                ] != ""
+            ]
+        )
+
+        print(
+            f"Features requiring A.3 review: "
+            f"{len(review_features)}"
+        )
+
+    print("\n" + "=" * 190)
+
     print(
-        "RANGE SUMMARY"
+        "SUSPICIOUS VALUE / RANGE SUMMARY"
     )
-    print("=" * 150)
+
+    print("=" * 190)
 
     if results.empty:
 
@@ -281,80 +565,45 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 150)
+    print("\n" + "=" * 190)
+
     print(
-        "FEATURES CONTAINING NEGATIVE VALUES"
+        "FEATURES SELECTED FOR MANUAL REVIEW"
     )
-    print("=" * 150)
+
+    print("=" * 190)
 
     if not results.empty:
 
-        negative_features = (
+        review_features = (
             results[
                 results[
-                    "negative_values_count"
-                ] > 0
+                    "review_reason"
+                ] != ""
             ]
         )
 
-        if negative_features.empty:
+        if review_features.empty:
 
             print(
-                "No numeric features contain negative values."
+                "No features require manual A.3 review."
             )
 
         else:
 
             print(
-                negative_features[
+                review_features[
                     [
                         "feature",
+                        "review_reason",
+                        "dictionary_data_type",
+                        "unit_of_measure",
+                        "unique_values",
                         "min_value",
                         "max_value",
-                        "negative_values_count",
                         "negative_values_percent",
-                    ]
-                ]
-                .to_string(
-                    index=False,
-                    float_format=lambda value: (
-                        f"{value:.2f}"
-                    ),
-                )
-            )
-
-    print("\n" + "=" * 150)
-    print(
-        "FEATURES CONTAINING ZERO VALUES"
-    )
-    print("=" * 150)
-
-    if not results.empty:
-
-        zero_features = (
-            results[
-                results[
-                    "zero_values_count"
-                ] > 0
-            ]
-        )
-
-        if zero_features.empty:
-
-            print(
-                "No numeric features contain zero values."
-            )
-
-        else:
-
-            print(
-                zero_features[
-                    [
-                        "feature",
-                        "min_value",
-                        "max_value",
-                        "zero_values_count",
                         "zero_values_percent",
+                        "feature_description",
                     ]
                 ]
                 .to_string(
@@ -365,27 +614,42 @@ def print_results(
                 )
             )
 
-    print("\n" + "=" * 150)
+    print("\n" + "=" * 190)
+
     print(
         "ARTIFACT SAVED"
     )
-    print("=" * 150)
+
+    print("=" * 190)
 
     print(
         SUMMARY_OUTPUT_PATH
     )
 
 
+# ---------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------
+
 def run_a3_numeric_suspicious_values() -> pd.DataFrame:
-    """Run EDA Level 1 A.3."""
+    """
+    Run EDA Level 1 A.3.
+    """
 
     dataframe = (
         load_training_data()
     )
 
+    feature_metadata = (
+        load_feature_dictionary()
+    )
+
     results = (
         build_range_summary(
-            dataframe
+            dataframe=dataframe,
+            feature_metadata=(
+                feature_metadata
+            ),
         )
     )
 

@@ -14,6 +14,10 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 REPORTS_FIGURES_DIR = (
@@ -73,14 +77,23 @@ def analyze_category_distribution(
     Calculate category counts and percentages for one feature.
 
     Missing values are represented explicitly as <MISSING>.
-    Percentages are calculated relative to all rows.
+
+    Percentages are calculated relative to all rows so the
+    visualization represents the raw dataset distribution,
+    including missing values.
     """
 
     series = (
-        dataframe[feature]
-        .astype("object")
+        dataframe[
+            feature
+        ]
+        .astype(
+            "object"
+        )
         .where(
-            dataframe[feature].notna(),
+            dataframe[
+                feature
+            ].notna(),
             "<MISSING>",
         )
     )
@@ -94,27 +107,42 @@ def analyze_category_distribution(
 
     percentages = (
         counts
-        / len(dataframe)
+        / len(
+            dataframe
+        )
         * 100
     )
 
     result = pd.DataFrame(
         {
             "feature": feature,
-            "category_value": counts.index,
-            "count": counts.values,
-            "percent": percentages.values,
+            "category_value": (
+                counts.index
+            ),
+            "count": (
+                counts.values
+            ),
+            "percent": (
+                percentages.values
+            ),
         }
     )
 
     return result
 
 
+# ---------------------------------------------------------------------
+# Build summary table
+# ---------------------------------------------------------------------
+
 def build_distribution_summary(
     dataframe: pd.DataFrame,
 ) -> pd.DataFrame:
     """
     Build category-distribution table for all categorical features.
+
+    The output uses long format:
+    one row per category per feature.
     """
 
     features = (
@@ -129,14 +157,19 @@ def build_distribution_summary(
 
     for feature in features:
 
-        tables.append(
+        distribution = (
             analyze_category_distribution(
                 dataframe=dataframe,
                 feature=feature,
             )
         )
 
+        tables.append(
+            distribution
+        )
+
     if not tables:
+
         return pd.DataFrame(
             columns=[
                 "feature",
@@ -146,12 +179,14 @@ def build_distribution_summary(
             ]
         )
 
-    return (
+    results = (
         pd.concat(
             tables,
             ignore_index=True,
         )
     )
+
+    return results
 
 
 # ---------------------------------------------------------------------
@@ -162,7 +197,15 @@ def save_category_barplot(
     dataframe: pd.DataFrame,
     feature: str,
 ) -> None:
-    """Save category distribution bar plot for one feature."""
+    """
+    Save category distribution bar plot for one categorical feature.
+
+    Categories are displayed using a horizontal bar plot and sorted
+    from the least common category at the bottom to the most common
+    category at the top.
+
+    Percentage labels are displayed next to each bar.
+    """
 
     distribution = (
         analyze_category_distribution(
@@ -179,48 +222,106 @@ def save_category_barplot(
         exist_ok=True,
     )
 
-    # Reverse order so the largest category appears at the top
-    # in the horizontal bar plot.
+    # Sort ascending for horizontal plotting so the most frequent
+    # category appears at the top of the graph.
     plot_data = (
         distribution
         .sort_values(
             by="percent",
             ascending=True,
         )
-    )
-
-    figure_height = max(
-        4,
-        0.45 * len(plot_data),
-    )
-
-    figure, axis = plt.subplots(
-        figsize=(
-            9,
-            figure_height,
+        .reset_index(
+            drop=True
         )
     )
 
-    axis.barh(
+    # Dynamic height:
+    # features with many categories receive more vertical space.
+    figure_height = max(
+        4,
+        0.45
+        * len(
+            plot_data
+        ),
+    )
+
+    figure, axis = (
+        plt.subplots(
+            figsize=(
+                9,
+                figure_height,
+            )
+        )
+    )
+
+    bars = axis.barh(
         plot_data[
             "category_value"
-        ].astype(str),
+        ].astype(
+            str
+        ),
         plot_data[
             "percent"
         ],
     )
 
     axis.set_title(
-        f"Category Distribution of {feature}"
+        f"Category Distribution — {feature}"
     )
 
     axis.set_xlabel(
-        "Percentage of Rows (%)"
+        "Observations (%)"
     )
 
     axis.set_ylabel(
         "Category"
     )
+
+    # -------------------------------------------------------------
+    # Percentage labels
+    # -------------------------------------------------------------
+
+    for bar, percent in zip(
+        bars,
+        plot_data[
+            "percent"
+        ],
+    ):
+
+        axis.text(
+            bar.get_width(),
+            bar.get_y()
+            + bar.get_height()
+            / 2,
+            f"  {percent:.2f}%",
+            va="center",
+            ha="left",
+        )
+
+    # -------------------------------------------------------------
+    # Extra horizontal space for percentage labels
+    # -------------------------------------------------------------
+
+    max_percent = (
+        plot_data[
+            "percent"
+        ].max()
+    )
+
+    if max_percent > 0:
+
+        axis.set_xlim(
+            0,
+            max_percent
+            * 1.15,
+        )
+
+    else:
+
+        axis.set_xlim(
+            0,
+            1,
+        )
 
     figure.tight_layout()
 
@@ -243,7 +344,9 @@ def save_category_barplot(
 def save_all_category_barplots(
     dataframe: pd.DataFrame,
 ) -> None:
-    """Save bar plots for all categorical predictor features."""
+    """
+    Save category-distribution plots for all categorical features.
+    """
 
     features = (
         get_categorical_features(
@@ -266,7 +369,9 @@ def save_all_category_barplots(
 def save_summary(
     results: pd.DataFrame,
 ) -> None:
-    """Save B.2 category distribution summary."""
+    """
+    Save B.2 category-distribution summary.
+    """
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -282,13 +387,24 @@ def save_summary(
 def print_results(
     results: pd.DataFrame,
 ) -> None:
-    """Print B.2 categorical distribution results."""
+    """
+    Print B.2 categorical-distribution results.
+    """
 
-    print("=" * 130)
     print(
-        "EDA LEVEL 1 — B.2 CATEGORICAL FEATURE DISTRIBUTION"
+        "="
+        * 140
     )
-    print("=" * 130)
+
+    print(
+        "EDA LEVEL 1 — "
+        "B.2 CATEGORICAL FEATURE DISTRIBUTION"
+    )
+
+    print(
+        "="
+        * 140
+    )
 
     if results.empty:
 
@@ -315,11 +431,20 @@ def print_results(
             f"{len(results)}"
         )
 
-    print("\n" + "=" * 130)
+    print(
+        "\n"
+        + "="
+        * 140
+    )
+
     print(
         "CATEGORY DISTRIBUTIONS"
     )
-    print("=" * 130)
+
+    print(
+        "="
+        * 140
+    )
 
     if not results.empty:
 
@@ -332,11 +457,20 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 130)
+    print(
+        "\n"
+        + "="
+        * 140
+    )
+
     print(
         "ARTIFACTS SAVED"
     )
-    print("=" * 130)
+
+    print(
+        "="
+        * 140
+    )
 
     print(
         SUMMARY_OUTPUT_PATH
@@ -352,7 +486,9 @@ def print_results(
 # ---------------------------------------------------------------------
 
 def run_b2_categorical_distribution() -> pd.DataFrame:
-    """Run EDA Level 1 B.2."""
+    """
+    Run EDA Level 1 B.2.
+    """
 
     dataframe = (
         load_training_data()

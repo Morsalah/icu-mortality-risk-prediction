@@ -1,0 +1,9 @@
+feature,observed_count,missing_percent,unique_categories,rare_categories_count,rare_observations_count,rare_observations_percent,has_rare_categories
+apache_2_bodysystem,90051,1.8121749370318276,10,2,984,1.0927141286604258,True
+apache_3j_bodysystem,90051,1.8121749370318276,11,2,951,1.056068228004131,True
+icu_admit_source,91601,0.12212009202621221,5,1,859,0.93776268818026,True
+ethnicity,90318,1.5210493605050537,6,1,788,0.8724728182643549,True
+hospital_admit_source,70304,23.343473662403365,15,6,464,0.6599908966772873,True
+icu_stay_type,91713,0.0,3,1,560,0.6106004601310611,True
+gender,91688,0.027258949112993792,2,0,0,0.0,False
+icu_type,91713,0.0,8,0,0,0.0,False

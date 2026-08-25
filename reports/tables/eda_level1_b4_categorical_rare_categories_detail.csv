@@ -1,0 +1,14 @@
+feature,category_value,count,percent_observed
+apache_2_bodysystem,Undefined Diagnoses,346,0.3842267159720603
+apache_2_bodysystem,Haematologic,638,0.7084874126883656
+apache_3j_bodysystem,Gynecological,313,0.3475808153157655
+apache_3j_bodysystem,Hematological,638,0.7084874126883656
+ethnicity,Native American,788,0.8724728182643549
+hospital_admit_source,Other,7,0.009956759217114246
+hospital_admit_source,Observation,10,0.014223941738734636
+hospital_admit_source,ICU,35,0.049783796085571236
+hospital_admit_source,ICU to SDU,45,0.06400773782430587
+hospital_admit_source,Chest Pain Center,134,0.19060081929904416
+hospital_admit_source,Other ICU,233,0.3314178425125171
+icu_admit_source,Other ICU,859,0.93776268818026
+icu_stay_type,readmit,560,0.6106004601310611

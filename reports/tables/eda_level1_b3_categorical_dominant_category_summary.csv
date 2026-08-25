@@ -1,0 +1,9 @@
+feature,review_priority,review_reason,dictionary_data_type,feature_description,missing_percent,unique_categories,dominant_category,dominant_category_percent
+icu_stay_type,MEDIUM,VERY_HIGH_CATEGORY_DOMINANCE,string,,0.0,3,admit,93.97032045620577
+ethnicity,NO_REVIEW,,,,1.5210493605050537,6,Caucasian,78.2612546779158
+icu_admit_source,NO_REVIEW,,,,0.12212009202621221,5,Accident & Emergency,59.01682296044803
+icu_type,NO_REVIEW,,,,0.0,8,Med-Surg ICU,55.156847993196166
+gender,NO_REVIEW,,,,0.027258949112993792,2,M,53.95362533810313
+hospital_admit_source,NO_REVIEW,,,,23.343473662403365,15,Emergency Department,52.57453345471097
+apache_2_bodysystem,NO_REVIEW,,,,1.8121749370318276,10,Cardiovascular,43.1044630265072
+apache_3j_bodysystem,NO_REVIEW,,,,1.8121749370318276,11,Cardiovascular,33.313344660248084

@@ -13,12 +13,113 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 SUMMARY_OUTPUT_PATH = (
     REPORTS_TABLES_DIR
     / "eda_level1_b1_categorical_cardinality_summary.csv"
 )
+
+DICTIONARY_PATH = (
+    Path("data")
+    / "reference"
+    / "WiDS Datathon 2020 Dictionary.csv"
+)
+
+
+# ---------------------------------------------------------------------
+# Feature dictionary
+# ---------------------------------------------------------------------
+
+def load_feature_dictionary() -> dict[
+    str,
+    dict[str, str],
+]:
+    """
+    Load categorical feature metadata from the WiDS data dictionary.
+
+    Mapping:
+
+        Variable Name ->
+        {
+            "description": ...,
+            "data_type": ...
+        }
+    """
+
+    if not DICTIONARY_PATH.exists():
+        raise FileNotFoundError(
+            "WiDS data dictionary was not found: "
+            f"{DICTIONARY_PATH.resolve()}"
+        )
+
+    dictionary = pd.read_csv(
+        DICTIONARY_PATH
+    )
+
+    required_columns = {
+        "Variable Name",
+        "Description",
+        "Data Type",
+    }
+
+    missing_columns = (
+        required_columns
+        - set(dictionary.columns)
+    )
+
+    if missing_columns:
+        raise ValueError(
+            "Dictionary is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ] = {}
+
+    for _, row in dictionary.iterrows():
+
+        feature = row[
+            "Variable Name"
+        ]
+
+        if pd.isna(feature):
+            continue
+
+        description = (
+            ""
+            if pd.isna(
+                row["Description"]
+            )
+            else str(
+                row["Description"]
+            )
+        )
+
+        data_type = (
+            ""
+            if pd.isna(
+                row["Data Type"]
+            )
+            else str(
+                row["Data Type"]
+            )
+        )
+
+        feature_metadata[
+            str(feature)
+        ] = {
+            "description": description,
+            "data_type": data_type,
+        }
+
+    return feature_metadata
 
 
 # ---------------------------------------------------------------------
@@ -63,8 +164,15 @@ def classify_cardinality(
     """
     Classify categorical cardinality for descriptive EDA.
 
-    These thresholds are working EDA thresholds rather than
-    automatic preprocessing rules.
+    Working thresholds:
+
+        <= 2   -> binary
+        3-10   -> low
+        11-20  -> moderate
+        > 20   -> high
+
+    These are descriptive EDA thresholds and are not automatic
+    preprocessing or encoding rules.
     """
 
     if unique_categories <= 2:
@@ -86,8 +194,14 @@ def classify_cardinality(
 def analyze_categorical_cardinality(
     dataframe: pd.DataFrame,
     feature: str,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> dict[str, object]:
-    """Analyze cardinality of one categorical feature."""
+    """
+    Analyze cardinality of one categorical feature.
+    """
 
     series = dataframe[
         feature
@@ -104,20 +218,8 @@ def analyze_categorical_cardinality(
         * 100
     )
 
-    observed_count = len(
-        observed
-    )
-
     unique_categories = int(
         observed.nunique()
-    )
-
-    cardinality_ratio_percent = (
-        unique_categories
-        / observed_count
-        * 100
-        if observed_count > 0
-        else float("nan")
     )
 
     cardinality_level = (
@@ -126,22 +228,62 @@ def analyze_categorical_cardinality(
         )
     )
 
+    dictionary_data_type = ""
+    feature_description = ""
+
+    # Only show metadata when cardinality deserves
+    # additional manual attention.
+    if cardinality_level in {
+        "moderate",
+        "high",
+    }:
+
+        metadata = (
+            feature_metadata.get(
+                feature
+            )
+        )
+
+        if metadata is None:
+
+            dictionary_data_type = (
+                "Data type not found in dictionary"
+            )
+
+            feature_description = (
+                "Description not found in dictionary"
+            )
+
+        else:
+
+            dictionary_data_type = (
+                metadata[
+                    "data_type"
+                ]
+            )
+
+            feature_description = (
+                metadata[
+                    "description"
+                ]
+            )
+
     return {
         "feature": feature,
+        "cardinality_level": (
+            cardinality_level
+        ),
+        "dictionary_data_type": (
+            dictionary_data_type
+        ),
+        "feature_description": (
+            feature_description
+        ),
         "missing_percent": (
             missing_percent
         ),
-        "observed_count": (
-            observed_count
-        ),
         "unique_categories": (
             unique_categories
-        ),
-        "cardinality_ratio_percent": (
-            cardinality_ratio_percent
-        ),
-        "cardinality_level": (
-            cardinality_level
         ),
     }
 
@@ -152,8 +294,14 @@ def analyze_categorical_cardinality(
 
 def build_cardinality_summary(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> pd.DataFrame:
-    """Build B.1 cardinality summary for categorical features."""
+    """
+    Build B.1 cardinality summary for categorical features.
+    """
 
     features = (
         get_categorical_features(
@@ -171,6 +319,9 @@ def build_cardinality_summary(
             analyze_categorical_cardinality(
                 dataframe=dataframe,
                 feature=feature,
+                feature_metadata=(
+                    feature_metadata
+                ),
             )
         )
 
@@ -186,6 +337,7 @@ def build_cardinality_summary(
         .sort_values(
             by="unique_categories",
             ascending=False,
+            na_position="last",
         )
         .reset_index(
             drop=True
@@ -200,7 +352,9 @@ def build_cardinality_summary(
 def save_summary(
     results: pd.DataFrame,
 ) -> None:
-    """Save B.1 categorical cardinality summary."""
+    """
+    Save B.1 categorical cardinality summary.
+    """
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -216,24 +370,31 @@ def save_summary(
 def print_results(
     results: pd.DataFrame,
 ) -> None:
-    """Print B.1 categorical cardinality results."""
+    """
+    Print B.1 categorical cardinality results.
+    """
 
-    print("=" * 130)
+    print("=" * 160)
+
     print(
         "EDA LEVEL 1 — B.1 CATEGORICAL FEATURE CARDINALITY"
     )
-    print("=" * 130)
+
+    print("=" * 160)
 
     print(
         f"Categorical features investigated: "
         f"{len(results)}"
     )
 
-    print("\n" + "=" * 130)
+    print("\n" + "=" * 160)
+
     print(
-        "CARDINALITY SUMMARY"
+        "CARDINALITY SUMMARY — "
+        "SORTED BY NUMBER OF UNIQUE CATEGORIES"
     )
-    print("=" * 130)
+
+    print("=" * 160)
 
     if results.empty:
 
@@ -252,11 +413,13 @@ def print_results(
             )
         )
 
-    print("\n" + "=" * 130)
+    print("\n" + "=" * 160)
+
     print(
         "CARDINALITY LEVEL COUNTS"
     )
-    print("=" * 130)
+
+    print("=" * 160)
 
     if not results.empty:
 
@@ -268,37 +431,47 @@ def print_results(
             .to_string()
         )
 
-    print("\n" + "=" * 130)
+    print("\n" + "=" * 160)
+
     print(
-        "HIGH-CARDINALITY FEATURES"
+        "MODERATE / HIGH CARDINALITY FEATURES"
     )
-    print("=" * 130)
+
+    print("=" * 160)
 
     if not results.empty:
 
-        high_cardinality = (
+        review_features = (
             results[
                 results[
                     "cardinality_level"
-                ] == "high"
+                ].isin(
+                    [
+                        "moderate",
+                        "high",
+                    ]
+                )
             ]
         )
 
-        if high_cardinality.empty:
+        if review_features.empty:
 
             print(
-                "No high-cardinality categorical features detected."
+                "No moderate/high cardinality "
+                "categorical features detected."
             )
 
         else:
 
             print(
-                high_cardinality[
+                review_features[
                     [
                         "feature",
+                        "cardinality_level",
                         "unique_categories",
-                        "cardinality_ratio_percent",
                         "missing_percent",
+                        "dictionary_data_type",
+                        "feature_description",
                     ]
                 ]
                 .to_string(
@@ -309,27 +482,42 @@ def print_results(
                 )
             )
 
-    print("\n" + "=" * 130)
+    print("\n" + "=" * 160)
+
     print(
         "ARTIFACT SAVED"
     )
-    print("=" * 130)
+
+    print("=" * 160)
 
     print(
         SUMMARY_OUTPUT_PATH
     )
 
 
+# ---------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------
+
 def run_b1_categorical_cardinality() -> pd.DataFrame:
-    """Run EDA Level 1 B.1."""
+    """
+    Run EDA Level 1 B.1.
+    """
 
     dataframe = (
         load_training_data()
     )
 
+    feature_metadata = (
+        load_feature_dictionary()
+    )
+
     results = (
         build_cardinality_summary(
-            dataframe
+            dataframe=dataframe,
+            feature_metadata=(
+                feature_metadata
+            ),
         )
     )
 

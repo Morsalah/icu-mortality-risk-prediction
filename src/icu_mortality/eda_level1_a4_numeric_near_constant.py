@@ -13,11 +13,21 @@ from icu_mortality.data import (
 )
 
 
+# ---------------------------------------------------------------------
+# Paths
+# ---------------------------------------------------------------------
+
 REPORTS_TABLES_DIR = Path("reports") / "tables"
 
 SUMMARY_OUTPUT_PATH = (
     REPORTS_TABLES_DIR
     / "eda_level1_a4_numeric_near_constant_summary.csv"
+)
+
+DICTIONARY_PATH = (
+    Path("data")
+    / "reference"
+    / "WiDS Datathon 2020 Dictionary.csv"
 )
 
 
@@ -27,7 +37,104 @@ KNOWN_IDENTIFIER_COLUMNS = {
 }
 
 
-NEAR_CONSTANT_THRESHOLD_PERCENT = 95.0
+# ---------------------------------------------------------------------
+# Review thresholds
+# ---------------------------------------------------------------------
+
+DOMINANCE_LOW_THRESHOLD_PERCENT = 95.0
+DOMINANCE_MEDIUM_THRESHOLD_PERCENT = 98.0
+DOMINANCE_HIGH_THRESHOLD_PERCENT = 99.0
+
+
+# ---------------------------------------------------------------------
+# Feature dictionary
+# ---------------------------------------------------------------------
+
+def load_feature_dictionary() -> dict[
+    str,
+    dict[str, str],
+]:
+    """
+    Load feature metadata from the WiDS data dictionary.
+
+    Mapping:
+
+        Variable Name ->
+        {
+            "description": ...,
+            "data_type": ...
+        }
+    """
+
+    if not DICTIONARY_PATH.exists():
+        raise FileNotFoundError(
+            "WiDS data dictionary was not found: "
+            f"{DICTIONARY_PATH.resolve()}"
+        )
+
+    dictionary = pd.read_csv(
+        DICTIONARY_PATH
+    )
+
+    required_columns = {
+        "Variable Name",
+        "Description",
+        "Data Type",
+    }
+
+    missing_columns = (
+        required_columns
+        - set(dictionary.columns)
+    )
+
+    if missing_columns:
+        raise ValueError(
+            "Dictionary is missing required columns: "
+            f"{sorted(missing_columns)}"
+        )
+
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ] = {}
+
+    for _, row in dictionary.iterrows():
+
+        feature = row[
+            "Variable Name"
+        ]
+
+        if pd.isna(feature):
+            continue
+
+        description = (
+            ""
+            if pd.isna(
+                row["Description"]
+            )
+            else str(
+                row["Description"]
+            )
+        )
+
+        data_type = (
+            ""
+            if pd.isna(
+                row["Data Type"]
+            )
+            else str(
+                row["Data Type"]
+            )
+        )
+
+        feature_metadata[
+            str(feature)
+        ] = {
+            "description": description,
+            "data_type": data_type,
+        }
+
+    return feature_metadata
 
 
 # ---------------------------------------------------------------------
@@ -66,12 +173,71 @@ def get_numeric_features(
 
 
 # ---------------------------------------------------------------------
+# Review policy
+# ---------------------------------------------------------------------
+
+def assign_review_information(
+    dominant_value_percent: float,
+) -> tuple[str, str]:
+    """
+    Assign A.4 review priority and reason.
+
+    The thresholds are working EDA thresholds and do not represent
+    automatic feature-removal rules.
+    """
+
+    if pd.isna(
+        dominant_value_percent
+    ):
+        return (
+            "NO_REVIEW",
+            "NO_OBSERVED_VALUES",
+        )
+
+    if (
+        dominant_value_percent
+        < DOMINANCE_LOW_THRESHOLD_PERCENT
+    ):
+        return (
+            "NO_REVIEW",
+            "",
+        )
+
+    if (
+        dominant_value_percent
+        <= DOMINANCE_MEDIUM_THRESHOLD_PERCENT
+    ):
+        return (
+            "LOW",
+            "HIGH_DOMINANCE",
+        )
+
+    if (
+        dominant_value_percent
+        <= DOMINANCE_HIGH_THRESHOLD_PERCENT
+    ):
+        return (
+            "MEDIUM",
+            "VERY_HIGH_DOMINANCE",
+        )
+
+    return (
+        "HIGH",
+        "EXTREME_DOMINANCE",
+    )
+
+
+# ---------------------------------------------------------------------
 # Near-constant analysis
 # ---------------------------------------------------------------------
 
 def analyze_near_constant_feature(
     dataframe: pd.DataFrame,
     feature: str,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> dict[str, object]:
     """
     Analyze whether one observed value dominates a numeric feature.
@@ -96,10 +262,6 @@ def analyze_near_constant_feature(
         * 100
     )
 
-    observed_count = len(
-        observed
-    )
-
     unique_values = int(
         observed.nunique()
     )
@@ -108,20 +270,19 @@ def analyze_near_constant_feature(
 
         return {
             "feature": feature,
+            "review_priority": "NO_REVIEW",
+            "review_reason": "NO_OBSERVED_VALUES",
+            "dictionary_data_type": "",
+            "feature_description": "",
             "missing_percent": missing_percent,
-            "observed_count": observed_count,
             "unique_values": unique_values,
             "dominant_value": float("nan"),
-            "dominant_value_count": 0,
             "dominant_value_percent": float("nan"),
-            "near_constant": False,
         }
 
     value_counts = (
         observed
-        .value_counts(
-            dropna=False
-        )
+        .value_counts()
     )
 
     dominant_value = (
@@ -134,24 +295,83 @@ def analyze_near_constant_feature(
 
     dominant_value_percent = (
         dominant_value_count
-        / observed_count
+        / len(observed)
         * 100
     )
 
-    near_constant = bool(
+    (
+        review_priority,
+        review_reason,
+    ) = assign_review_information(
         dominant_value_percent
-        >= NEAR_CONSTANT_THRESHOLD_PERCENT
     )
+
+    dictionary_data_type = ""
+    feature_description = ""
+
+    # Only show dictionary metadata for features
+    # that deserve meaningful manual review.
+    if review_priority in {
+        "MEDIUM",
+        "HIGH",
+    }:
+
+        metadata = (
+            feature_metadata.get(
+                feature
+            )
+        )
+
+        if metadata is None:
+
+            dictionary_data_type = (
+                "Data type not found in dictionary"
+            )
+
+            feature_description = (
+                "Description not found in dictionary"
+            )
+
+        else:
+
+            dictionary_data_type = (
+                metadata[
+                    "data_type"
+                ]
+            )
+
+            feature_description = (
+                metadata[
+                    "description"
+                ]
+            )
 
     return {
         "feature": feature,
-        "missing_percent": missing_percent,
-        "observed_count": observed_count,
-        "unique_values": unique_values,
-        "dominant_value": dominant_value,
-        "dominant_value_count": dominant_value_count,
-        "dominant_value_percent": dominant_value_percent,
-        "near_constant": near_constant,
+        "review_priority": (
+            review_priority
+        ),
+        "review_reason": (
+            review_reason
+        ),
+        "dictionary_data_type": (
+            dictionary_data_type
+        ),
+        "feature_description": (
+            feature_description
+        ),
+        "missing_percent": (
+            missing_percent
+        ),
+        "unique_values": (
+            unique_values
+        ),
+        "dominant_value": (
+            dominant_value
+        ),
+        "dominant_value_percent": (
+            dominant_value_percent
+        ),
     }
 
 
@@ -161,8 +381,14 @@ def analyze_near_constant_feature(
 
 def build_near_constant_summary(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[
+        str,
+        dict[str, str],
+    ],
 ) -> pd.DataFrame:
-    """Build A.4 summary for all numeric predictor features."""
+    """
+    Build A.4 summary for all numeric predictor features.
+    """
 
     features = (
         get_numeric_features(
@@ -180,6 +406,9 @@ def build_near_constant_summary(
             analyze_near_constant_feature(
                 dataframe=dataframe,
                 feature=feature,
+                feature_metadata=(
+                    feature_metadata
+                ),
             )
         )
 
@@ -195,6 +424,7 @@ def build_near_constant_summary(
         .sort_values(
             by="dominant_value_percent",
             ascending=False,
+            na_position="last",
         )
         .reset_index(
             drop=True
@@ -209,7 +439,9 @@ def build_near_constant_summary(
 def save_summary(
     results: pd.DataFrame,
 ) -> None:
-    """Save A.4 near-constant summary."""
+    """
+    Save A.4 near-constant summary.
+    """
 
     REPORTS_TABLES_DIR.mkdir(
         parents=True,
@@ -225,13 +457,17 @@ def save_summary(
 def print_results(
     results: pd.DataFrame,
 ) -> None:
-    """Print A.4 numeric near-constant results."""
+    """
+    Print A.4 numeric near-constant results.
+    """
 
-    print("=" * 140)
+    print("=" * 180)
+
     print(
         "EDA LEVEL 1 — A.4 NUMERIC NEAR-CONSTANT FEATURES"
     )
-    print("=" * 140)
+
+    print("=" * 180)
 
     print(
         f"Numeric features investigated: "
@@ -239,15 +475,48 @@ def print_results(
     )
 
     print(
-        f"Near-constant threshold: "
-        f"{NEAR_CONSTANT_THRESHOLD_PERCENT:.2f}%"
+        "Review thresholds:"
     )
 
-    print("\n" + "=" * 140)
     print(
-        "NEAR-CONSTANT FEATURES"
+        f"  LOW:    "
+        f"{DOMINANCE_LOW_THRESHOLD_PERCENT:.2f}% "
+        f"to {DOMINANCE_MEDIUM_THRESHOLD_PERCENT:.2f}%"
     )
-    print("=" * 140)
+
+    print(
+        f"  MEDIUM: >"
+        f"{DOMINANCE_MEDIUM_THRESHOLD_PERCENT:.2f}% "
+        f"to {DOMINANCE_HIGH_THRESHOLD_PERCENT:.2f}%"
+    )
+
+    print(
+        f"  HIGH:   >"
+        f"{DOMINANCE_HIGH_THRESHOLD_PERCENT:.2f}%"
+    )
+
+    if not results.empty:
+
+        print(
+            "\nREVIEW PRIORITY COUNTS"
+        )
+
+        print(
+            results[
+                "review_priority"
+            ]
+            .value_counts()
+            .to_string()
+        )
+
+    print("\n" + "=" * 180)
+
+    print(
+        "NEAR-CONSTANT SUMMARY — "
+        "SORTED BY DOMINANT VALUE PERCENT"
+    )
+
+    print("=" * 180)
 
     if results.empty:
 
@@ -257,31 +526,58 @@ def print_results(
 
     else:
 
-        near_constant_features = (
+        print(
+            results.to_string(
+                index=False,
+                float_format=lambda value: (
+                    f"{value:.2f}"
+                ),
+            )
+        )
+
+    print("\n" + "=" * 180)
+
+    print(
+        "FEATURES SELECTED FOR MEDIUM / HIGH REVIEW"
+    )
+
+    print("=" * 180)
+
+    if not results.empty:
+
+        review_features = (
             results[
                 results[
-                    "near_constant"
-                ]
+                    "review_priority"
+                ].isin(
+                    [
+                        "MEDIUM",
+                        "HIGH",
+                    ]
+                )
             ]
         )
 
-        if near_constant_features.empty:
+        if review_features.empty:
 
             print(
-                "No near-constant numeric features were detected."
+                "No medium/high priority near-constant features."
             )
 
         else:
 
             print(
-                near_constant_features[
+                review_features[
                     [
                         "feature",
-                        "missing_percent",
+                        "review_priority",
+                        "review_reason",
+                        "dictionary_data_type",
                         "unique_values",
                         "dominant_value",
-                        "dominant_value_count",
                         "dominant_value_percent",
+                        "missing_percent",
+                        "feature_description",
                     ]
                 ]
                 .to_string(
@@ -292,79 +588,42 @@ def print_results(
                 )
             )
 
-    print("\n" + "=" * 140)
-    print(
-        "TOP 20 MOST DOMINATED FEATURES"
-    )
-    print("=" * 140)
+    print("\n" + "=" * 180)
 
-    if not results.empty:
-
-        print(
-            results.head(
-                20
-            )[
-                [
-                    "feature",
-                    "unique_values",
-                    "dominant_value",
-                    "dominant_value_percent",
-                    "near_constant",
-                ]
-            ]
-            .to_string(
-                index=False,
-                float_format=lambda value: (
-                    f"{value:.2f}"
-                ),
-            )
-        )
-
-    print("\n" + "=" * 140)
-    print(
-        "SUMMARY"
-    )
-    print("=" * 140)
-
-    if not results.empty:
-
-        near_constant_count = int(
-            results[
-                "near_constant"
-            ].sum()
-        )
-
-        print(
-            f"Near-constant features: "
-            f"{near_constant_count}"
-        )
-
-        print(
-            f"Other numeric features: "
-            f"{len(results) - near_constant_count}"
-        )
-
-    print("\n" + "=" * 140)
     print(
         "ARTIFACT SAVED"
     )
-    print("=" * 140)
+
+    print("=" * 180)
 
     print(
         SUMMARY_OUTPUT_PATH
     )
 
 
+# ---------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------
+
 def run_a4_numeric_near_constant() -> pd.DataFrame:
-    """Run EDA Level 1 A.4."""
+    """
+    Run EDA Level 1 A.4.
+    """
 
     dataframe = (
         load_training_data()
     )
 
+    feature_metadata = (
+        load_feature_dictionary()
+    )
+
     results = (
         build_near_constant_summary(
-            dataframe
+            dataframe=dataframe,
+            feature_metadata=(
+                feature_metadata
+            ),
         )
     )
 

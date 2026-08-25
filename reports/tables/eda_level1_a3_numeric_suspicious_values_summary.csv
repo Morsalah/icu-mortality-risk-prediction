@@ -1,0 +1,176 @@
+feature,review_reason,dictionary_data_type,unit_of_measure,feature_description,missing_percent,unique_values,min_value,max_value,negative_values_percent,zero_values_percent
+apache_4a_hospital_death_prob,HAS_NEGATIVE_VALUES | HAS_ZERO_VALUES,numeric,,"The APACHE IVa probabilistic prediction of in-hospital mortality for the patient which utilizes the APACHE III score and other covariates, including diagnosis.",8.665074744038467,101,-1.0,0.99,2.8305040231120024,2.9701788315068165
+apache_4a_icu_death_prob,HAS_NEGATIVE_VALUES | HAS_ZERO_VALUES,numeric,,"The APACHE IVa probabilistic prediction of in ICU mortality for the patient which utilizes the APACHE III score and other covariates, including diagnosis",8.665074744038467,99,-1.0,0.97,2.6621779719695344,11.572714466489984
+pre_icu_los_days,HAS_NEGATIVE_VALUES | HAS_ZERO_VALUES,numeric,Days,The length of stay of the patient between hospital admission and unit admission,0.0,9757,-24.94722222,159.0909722,0.848298496396367,4.046318406332799
+readmission_status,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the current unit stay is the second (or greater) stay at an ICU within the same hospitalization,0.0,1,0.0,0.0,0.0,100.0
+aids,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the patient has a definitive diagnosis of acquired immune deficiency syndrome (AIDS) (not HIV positive alone),0.7796059446316226,2,0.0,1.0,0.0,99.91428383041385
+lymphoma,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the patient has been diagnosed with non-Hodgkin lymphoma.,0.7796059446316226,2,0.0,1.0,0.0,99.58680410558473
+leukemia,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient has been diagnosed with acute or chronic myelogenous leukemia, acute or chronic lymphocytic leukemia, or multiple myeloma.",0.7796059446316226,2,0.0,1.0,0.0,99.29339106353986
+gcs_unable_apache,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the Glasgow Coma Scale was unable to be assessed due to patient sedation,1.1307012092069826,2,0.0,1.0,0.0,99.04715691031805
+hepatic_failure,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient has cirrhosis and additional complications including jaundice and ascites, upper GI bleeding, hepatic encephalopathy, or coma.",0.7796059446316226,2,0.0,1.0,0.0,98.70107035319458
+cirrhosis,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient has a history of heavy alcohol use with portal hypertension and varices, other causes of cirrhosis with evidence of portal hypertension and varices, or biopsy proven cirrhosis. This comorbidity does not apply to patients with a functioning liver transplant.",0.7796059446316226,2,0.0,1.0,0.0,98.43073474142288
+solid_tumor_with_metastasis,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the patient has been diagnosed with any solid tumor carcinoma (including malignant melanoma) which has evidence of metastasis.,0.7796059446316226,2,0.0,1.0,0.0,97.9362183784259
+immunosuppression,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient has their immune system suppressed within six months prior to ICU admission for any of the following reasons; radiation therapy, chemotherapy, use of non-cytotoxic immunosuppressive drugs, high dose steroids (at least 0.3 mg/kg/day of methylprednisolone or equivalent for at least 6 months).",0.7796059446316226,2,0.0,1.0,0.0,97.38345897712037
+arf_apache,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient had acute renal failure during the first 24 hours of their unit stay, defined as a 24 hour urine output <410ml, creatinine >=133 micromol/L and no chronic dialysis",0.7796059446316226,2,0.0,1.0,0.0,97.20213631068815
+intubated_apache,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the patient was intubated at the time of the highest scoring arterial blood gas used in the oxygenation score,0.7796059446316226,2,0.0,1.0,0.0,84.87768961955207
+elective_surgery,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,Whether the patient was admitted to the hospital for an elective surgical operation,0.0,2,0.0,1.0,0.0,81.62637793987766
+apache_post_operative,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"The APACHE operative status; 1 for post-operative, 0 for non-operative",0.0,2,0.0,1.0,0.0,79.88943770239769
+diabetes_mellitus,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient has been diagnosed with diabetes, either juvenile or adult onset, which requires medication.",0.7796059446316226,2,0.0,1.0,0.0,77.48082375436823
+ventilated_apache,LOW_UNIQUE_VALUES | HAS_ZERO_VALUES,binary,,"Whether the patient was invasively ventilated at the time of the highest scoring arterial blood gas using the oxygenation scoring algorithm, including any mode of positive pressure ventilation delivered through a circuit attached to an endo-tracheal tube or tracheostomy",0.7796059446316226,2,0.0,1.0,0.0,67.42785555726499
+d1_resprate_min,HAS_ZERO_VALUES,numeric,Breaths per minute,The patient's lowest respiratory rate during the first 24 hours of their unit stay,0.4197878163401045,55,0.0,100.0,0.0,4.02176769446391
+urineoutput_apache,HAS_ZERO_VALUES,numeric,Millilitres,The total urine output for the first 24 hours,53.4253595455388,24772,0.0,8716.669632,0.0,2.1819033126536347
+h1_resprate_min,HAS_ZERO_VALUES,numeric,Breaths per minute,The patient's lowest respiratory rate during the first hour of their unit stay,4.750689651412559,91,0.0,189.0,0.0,0.7257658317688539
+d1_heartrate_min,HAS_ZERO_VALUES,numeric,Beats per minute,The patient's lowest heart rate during the first 24 hours of their unit stay,0.15810190485536402,154,0.0,175.0,0.0,0.6530665734754499
+d1_spo2_min,HAS_ZERO_VALUES,numeric,Percentage,The patient's lowest peripheral oxygen saturation during the first 24 hours of their unit stay,0.36308920218507734,101,0.0,100.0,0.0,0.16633836725760562
+h1_spo2_min,HAS_ZERO_VALUES,numeric,Percentage,The patient's lowest peripheral oxygen saturation during the first hour of their unit stay,4.563148081515162,100,0.0,100.0,0.0,0.0708344758248789
+h1_spo2_max,HAS_ZERO_VALUES,numeric,Percentage,The patient's highest peripheral oxygen saturation during the first hour of their unit stay,4.563148081515162,72,0.0,100.0,0.0,0.013709898546750754
+d1_spo2_max,HAS_ZERO_VALUES,numeric,Percentage,The patient's highest peripheral oxygen saturation during the first 24 hours of their unit stay,0.36308920218507734,43,0.0,100.0,0.0,0.006565988181221274
+gcs_eyes_apache,LOW_UNIQUE_VALUES,integer,,The eye opening component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,4,1.0,4.0,0.0,0.0
+gcs_motor_apache,LOW_UNIQUE_VALUES,integer,,The motor component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,6,1.0,6.0,0.0,0.0
+gcs_verbal_apache,LOW_UNIQUE_VALUES,integer,,The verbal component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,5,1.0,5.0,0.0,0.0
+hospital_id,,,,,0.0,147,2.0,204.0,0.0,0.0
+age,,,,,4.610033473989511,74,16.0,89.0,0.0,0.0
+bmi,,,,,3.738837460338229,34888,14.84492591,67.81498973,0.0,0.0
+height,,,,,1.454537524669349,401,137.2,195.59,0.0,0.0
+icu_id,,,,,0.0,241,82.0,927.0,0.0,0.0
+weight,,,,,2.965773663493725,3409,38.6,186.0,0.0,0.0
+albumin_apache,,,,,59.292575752619584,35,1.2,4.6,0.0,0.0
+apache_2_diagnosis,,,,,1.8121749370318276,44,101.0,308.0,0.0,0.0
+apache_3j_diagnosis,,,,,1.2004841189362467,399,0.01,2201.05,0.0,0.0
+bilirubin_apache,,,,,63.38686990939125,362,0.1,51.0,0.0,0.0
+bun_apache,,,,,21.00247511257946,476,4.0,127.0,0.0,0.0
+creatinine_apache,,,,,20.55651870509088,1127,0.3,11.18,0.0,0.0
+fio2_apache,,,,,77.27148822958577,82,0.21,1.0,0.0,0.0
+glucose_apache,,,,,12.033190496439982,565,39.0,598.7,0.0,0.0
+heart_rate_apache,,,,,0.957334292848342,149,30.0,178.0,0.0,0.0
+hematocrit_apache,,,,,21.67413561872363,353,16.2,51.4,0.0,0.0
+map_apache,,,,,1.0838158167326335,161,40.0,200.0,0.0,0.0
+paco2_apache,,,,,77.27148822958577,704,18.0,95.0,0.0,0.0
+paco2_for_ph_apache,,,,,77.27148822958577,704,18.0,95.0,0.0,0.0
+pao2_apache,,,,,77.27148822958577,2003,31.0,498.0,0.0,0.0
+ph_apache,,,,,77.27148822958577,555,6.96054,7.59,0.0,0.0
+resprate_apache,,,,,1.3455017282173738,74,4.0,60.0,0.0,0.0
+sodium_apache,,,,,20.280658140067384,119,117.0,158.0,0.0,0.0
+temp_apache,,,,,4.47919051824714,191,32.1,39.7,0.0,0.0
+wbc_apache,,,,,24.000959515008777,3075,0.9,45.8,0.0,0.0
+d1_diasbp_invasive_max,,,,,74.12689585991082,145,37.0,181.0,0.0,0.0
+d1_diasbp_invasive_min,,,,,74.12689585991082,85,5.0,89.0,0.0,0.0
+d1_diasbp_max,,,,,0.17990906414575905,120,46.0,165.0,0.0,0.0
+d1_diasbp_min,,,,,0.17990906414575905,78,13.0,90.0,0.0,0.0
+d1_diasbp_noninvasive_max,,,,,1.1339722831005419,120,46.0,165.0,0.0,0.0
+d1_diasbp_noninvasive_min,,,,,1.1339722831005419,78,13.0,90.0,0.0,0.0
+d1_heartrate_max,,,,,0.15810190485536402,120,58.0,177.0,0.0,0.0
+d1_mbp_invasive_max,,,,,73.90119176125522,285,38.0,322.0,0.0,0.0
+d1_mbp_invasive_min,,,,,73.90119176125522,118,2.0,119.0,0.0,0.0
+d1_mbp_max,,,,,0.2398787521943454,125,60.0,184.0,0.0,0.0
+d1_mbp_min,,,,,0.2398787521943454,91,22.0,112.0,0.0,0.0
+d1_mbp_noninvasive_max,,,,,1.612639429524713,122,60.0,181.0,0.0,0.0
+d1_mbp_noninvasive_min,,,,,1.612639429524713,91,22.0,112.0,0.0,0.0
+d1_resprate_max,,,,,0.4197878163401045,79,14.0,92.0,0.0,0.0
+d1_sysbp_invasive_max,,,,,74.09963691079781,225,71.0,295.0,0.0,0.0
+d1_sysbp_invasive_min,,,,,74.09963691079781,163,10.0,172.0,0.0,0.0
+d1_sysbp_max,,,,,0.17336691635864054,143,90.0,232.0,0.0,0.0
+d1_sysbp_min,,,,,0.17336691635864054,120,41.0,160.0,0.0,0.0
+d1_sysbp_noninvasive_max,,,,,1.119797629561785,143,90.0,232.0,0.0,0.0
+d1_sysbp_noninvasive_min,,,,,1.119797629561785,120,41.03,160.0,0.0,0.0
+d1_temp_max,,,,,2.5339919095439036,186,35.1,39.9,0.0,0.0
+d1_temp_min,,,,,2.5339919095439036,209,31.889,37.8,0.0,0.0
+h1_diasbp_invasive_max,,,,,81.69834156553597,103,33.0,135.0,0.0,0.0
+h1_diasbp_invasive_min,,,,,81.69834156553597,86,19.0,104.0,0.0,0.0
+h1_diasbp_max,,,,,3.946005473596982,107,37.0,143.0,0.0,0.0
+h1_diasbp_min,,,,,3.946005473596982,92,22.0,113.0,0.0,0.0
+h1_diasbp_noninvasive_max,,,,,8.014131039220176,108,37.0,144.0,0.0,0.0
+h1_diasbp_noninvasive_min,,,,,8.014131039220176,93,22.0,114.0,0.0,0.0
+h1_heartrate_max,,,,,3.0420987210101074,119,46.0,164.0,0.0,0.0
+h1_heartrate_min,,,,,3.0420987210101074,109,36.0,144.0,0.0,0.0
+h1_mbp_invasive_max,,,,,81.60675149651631,247,35.625,293.375,0.0,0.0
+h1_mbp_invasive_min,,,,,81.60675149651631,133,8.0,140.0,0.0,0.0
+h1_mbp_max,,,,,5.058170597407129,117,49.0,165.0,0.0,0.0
+h1_mbp_min,,,,,5.058170597407129,107,32.0,138.0,0.0,0.0
+h1_mbp_noninvasive_max,,,,,9.904811749697426,115,49.0,163.0,0.0,0.0
+h1_mbp_noninvasive_min,,,,,9.904811749697426,107,32.0,138.0,0.0,0.0
+h1_resprate_max,,,,,4.750689651412559,50,10.0,59.0,0.0,0.0
+h1_sysbp_invasive_max,,,,,81.68416691199721,181,65.0,246.0,0.0,0.0
+h1_sysbp_invasive_min,,,,,81.68416691199721,168,31.44,198.0,0.0,0.0
+h1_sysbp_max,,,,,3.937282609880824,149,75.0,223.0,0.0,0.0
+h1_sysbp_min,,,,,3.937282609880824,142,53.0,194.0,0.0,0.0
+h1_sysbp_noninvasive_max,,,,,8.004317817539498,149,75.0,223.0,0.0,0.0
+h1_sysbp_noninvasive_min,,,,,8.004317817539498,143,53.0,195.0,0.0,0.0
+h1_temp_max,,,,,23.695659284943247,294,33.4,39.5,0.0,0.0
+h1_temp_min,,,,,23.695659284943247,303,32.9,39.3,0.0,0.0
+d1_albumin_max,,,,,53.53221462606174,35,1.2,4.6,0.0,0.0
+d1_albumin_min,,,,,53.53221462606174,35,1.1,4.5,0.0,0.0
+d1_bilirubin_max,,,,,58.522783029668645,374,0.2,51.0,0.0,0.0
+d1_bilirubin_min,,,,,58.522783029668645,357,0.2,51.0,0.0,0.0
+d1_bun_max,,,,,11.464023638960672,495,4.0,126.0,0.0,0.0
+d1_bun_min,,,,,11.464023638960672,472,3.0,113.09,0.0,0.0
+d1_calcium_max,,,,,14.249888238308635,47,6.2,10.8,0.0,0.0
+d1_calcium_min,,,,,14.249888238308635,49,5.5,10.3,0.0,0.0
+d1_creatinine_max,,,,,11.087850141201356,1187,0.34,11.11,0.0,0.0
+d1_creatinine_min,,,,,11.087850141201356,1093,0.3,9.9379,0.0,0.0
+d1_glucose_max,,,,,6.331708699966199,538,73.0,611.0,0.0,0.0
+d1_glucose_min,,,,,6.331708699966199,256,33.0,288.0,0.0,0.0
+d1_hco3_max,,,,,16.43278488327718,223,12.0,40.0,0.0,0.0
+d1_hco3_min,,,,,16.43278488327718,255,7.0,39.0,0.0,0.0
+d1_hemaglobin_max,,,,,13.244578195021425,105,6.8,17.2,0.0,0.0
+d1_hemaglobin_min,,,,,13.244578195021425,115,5.3,16.7,0.0,0.0
+d1_hematocrit_max,,,,,12.707031718513187,312,20.4,51.5,0.0,0.0
+d1_hematocrit_min,,,,,12.707031718513187,340,16.1,50.0,0.0,0.0
+d1_inr_max,,,,,63.17643082223894,481,0.9,7.756,0.0,0.0
+d1_inr_min,,,,,63.17643082223894,393,0.9,6.127,0.0,0.0
+d1_lactate_max,,,,,74.57612334129294,704,0.4,19.8,0.0,0.0
+d1_lactate_min,,,,,74.57612334129294,486,0.4,15.1,0.0,0.0
+d1_platelets_max,,,,,14.658772475003543,559,27.0,585.0,0.0,0.0
+d1_platelets_min,,,,,14.658772475003543,540,18.55,557.45,0.0,0.0
+d1_potassium_max,,,,,10.451081089921821,100,2.8,7.0,0.0,0.0
+d1_potassium_min,,,,,10.451081089921821,116,2.4,5.8,0.0,0.0
+d1_sodium_max,,,,,11.11619944827887,71,123.0,158.0,0.0,0.0
+d1_sodium_min,,,,,11.11619944827887,138,117.0,153.0,0.0,0.0
+d1_wbc_max,,,,,14.364375824583211,3098,1.2,46.08,0.0,0.0
+d1_wbc_min,,,,,14.364375824583211,2774,0.9,40.898,0.0,0.0
+h1_albumin_max,,,,,91.39816601790368,37,1.1,4.7,0.0,0.0
+h1_albumin_min,,,,,91.39816601790368,37,1.1,4.7,0.0,0.0
+h1_bilirubin_max,,,,,92.26500059969688,181,0.2,40.4,0.0,0.0
+h1_bilirubin_min,,,,,92.26500059969688,181,0.2,40.4,0.0,0.0
+h1_bun_max,,,,,81.87606991375269,258,4.0,135.0,0.0,0.0
+h1_bun_min,,,,,81.87606991375269,258,4.0,135.0,0.0,0.0
+h1_calcium_max,,,,,82.71782626236194,59,5.6,11.4,0.0,0.0
+h1_calcium_min,,,,,82.71782626236194,62,5.3,11.315,0.0,0.0
+h1_creatinine_max,,,,,81.72996194650703,784,0.33,11.6042,0.0,0.0
+h1_creatinine_min,,,,,81.72996194650703,777,0.33,11.571,0.0,0.0
+h1_glucose_max,,,,,57.36809394524223,601,59.0,695.045,0.0,0.0
+h1_glucose_min,,,,,57.36809394524223,588,42.0,670.0,0.0,0.0
+h1_hco3_max,,,,,82.969698952166,214,6.0,39.0,0.0,0.0
+h1_hco3_min,,,,,82.969698952166,198,6.0,39.0,0.0,0.0
+h1_hemaglobin_max,,,,,79.73024543957781,124,5.1,17.4,0.0,0.0
+h1_hemaglobin_min,,,,,79.73024543957781,124,5.0,17.3,0.0,0.0
+h1_hematocrit_max,,,,,80.05408175504019,358,16.0,51.7,0.0,0.0
+h1_hematocrit_min,,,,,80.05408175504019,361,15.5,51.5,0.0,0.0
+h1_inr_max,,,,,63.17643082223894,481,0.9,7.756,0.0,0.0
+h1_inr_min,,,,,63.17643082223894,393,0.9,6.127,0.0,0.0
+h1_lactate_max,,,,,91.99241110856694,547,0.4,18.1,0.0,0.0
+h1_lactate_min,,,,,91.99241110856694,536,0.4,18.0195,0.0,0.0
+h1_platelets_max,,,,,82.51065824910319,544,20.0,585.0,0.0,0.0
+h1_platelets_min,,,,,82.51065824910319,545,20.0,585.0,0.0,0.0
+h1_potassium_max,,,,,78.61698995780316,115,2.5,7.2,0.0,0.0
+h1_potassium_min,,,,,78.61698995780316,113,2.5,7.1,0.0,0.0
+h1_sodium_max,,,,,79.17852430953081,99,114.0,157.0,0.0,0.0
+h1_sodium_min,,,,,79.17852430953081,113,114.0,157.0,0.0,0.0
+h1_wbc_max,,,,,82.81595847916871,2075,1.1,44.102,0.0,0.0
+h1_wbc_min,,,,,82.81595847916871,2072,1.0898,44.102,0.0,0.0
+d1_arterial_pco2_max,,,,,64.62660691505022,831,18.4,111.0,0.0,0.0
+d1_arterial_pco2_min,,,,,64.62660691505022,674,14.9,85.912,0.0,0.0
+d1_arterial_ph_max,,,,,65.55559190082104,527,7.05428,7.62,0.0,0.0
+d1_arterial_ph_min,,,,,65.55559190082104,624,6.89,7.55786,0.0,0.0
+d1_arterial_po2_max,,,,,64.61679369336953,2428,39.0,540.865,0.0,0.0
+d1_arterial_po2_min,,,,,64.61679369336953,1822,28.0,448.892,0.0,0.0
+d1_pao2fio2ratio_max,,,,,71.97234852201979,5194,54.8,834.805,0.0,0.0
+d1_pao2fio2ratio_min,,,,,71.97234852201979,4990,36.0,604.2277778,0.0,0.0
+h1_arterial_pco2_max,,,,,82.82250062695583,779,15.0,111.505,0.0,0.0
+h1_arterial_pco2_min,,,,,82.82250062695583,768,14.997,107.0,0.0,0.0
+h1_arterial_ph_max,,,,,83.32951708045752,561,6.93,7.57,0.0,0.0
+h1_arterial_ph_min,,,,,83.32951708045752,579,6.9,7.563,0.0,0.0
+h1_arterial_po2_max,,,,,82.80723561545256,1737,34.0,534.905,0.0,0.0
+h1_arterial_po2_min,,,,,82.80723561545256,1729,31.0,514.905,0.0,0.0
+h1_pao2fio2ratio_max,,,,,87.44125696466149,3142,42.0,720.0,0.0,0.0
+h1_pao2fio2ratio_min,,,,,87.44125696466149,3122,38.0,654.8137931,0.0,0.0
