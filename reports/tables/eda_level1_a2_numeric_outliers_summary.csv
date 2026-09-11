@@ -1,15 +1,9 @@
 feature,review_priority,review_reason,dictionary_data_type,feature_description,missing_percent,unique_values,q1,q3,iqr,lower_bound,upper_bound,outlier_count,outlier_percent_observed
-diabetes_mellitus,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,binary,"Whether the patient has been diagnosed with diabetes, either juvenile or adult onset, which requires medication.",0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,20492,22.519176245631773
-gcs_motor_apache,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,integer,The motor component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,6,6.0,6.0,0.0,6.0,6.0,18852,20.990513517124658
-gcs_verbal_apache,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,integer,The verbal component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,5,4.0,5.0,1.0,2.5,6.5,18681,20.80011579744355
-apache_post_operative,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,binary,"The APACHE operative status; 1 for post-operative, 0 for non-operative",0.0,2,0.0,0.0,0.0,0.0,0.0,18444,20.110562297602304
-elective_surgery,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,binary,Whether the patient was admitted to the hospital for an elective surgical operation,0.0,2,0.0,0.0,0.0,0.0,0.0,16851,18.373622060122337
 pre_icu_los_days,HIGH,HIGH_OUTLIER_PERCENT,numeric,The length of stay of the patient between hospital admission and unit admission,0.0,9757,0.035416667,0.409027778,0.373611111,-0.5249999995,0.9694444445,15815,17.244011208879876
 apache_4a_icu_death_prob,HIGH,HIGH_OUTLIER_PERCENT,numeric,"The APACHE IVa probabilistic prediction of in ICU mortality for the patient which utilizes the APACHE III score and other covariates, including diagnosis",8.665074744038467,99,0.01,0.06,0.049999999999999996,-0.065,0.135,13377,15.969486426473747
-intubated_apache,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,binary,Whether the patient was intubated at the time of the highest scoring arterial blood gas used in the oxygenation score,0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,13761,15.122310380447923
 apache_4a_hospital_death_prob,HIGH,HIGH_OUTLIER_PERCENT,numeric,"The APACHE IVa probabilistic prediction of in-hospital mortality for the patient which utilizes the APACHE III score and other covariates, including diagnosis.",8.665074744038467,101,0.02,0.13,0.11,-0.14500000000000002,0.29500000000000004,11372,13.575913855263472
-d1_inr_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The lowest international normalized ratio for the patient during the first 24 hours of their unit stay,63.17643082223894,393,1.1,1.5,0.3999999999999999,0.5000000000000002,2.0999999999999996,3906,11.56579414899917
 h1_inr_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The lowest international normalized ratio for the patient during the first hour of their unit stay,63.17643082223894,393,1.1,1.5,0.3999999999999999,0.5000000000000002,2.0999999999999996,3906,11.56579414899917
+d1_inr_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The lowest international normalized ratio for the patient during the first 24 hours of their unit stay,63.17643082223894,393,1.1,1.5,0.3999999999999999,0.5000000000000002,2.0999999999999996,3906,11.56579414899917
 d1_inr_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest international normalized ratio for the patient during the first 24 hours of their unit stay,63.17643082223894,481,1.1,1.6,0.5,0.3500000000000001,2.35,3783,11.201587113585218
 h1_inr_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest international normalized ratio for the patient during the first hour of their unit stay,63.17643082223894,481,1.1,1.6,0.5,0.3500000000000001,2.35,3783,11.201587113585218
 h1_creatinine_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest creatinine concentration of the patient in their serum or plasma during the first hour of their unit stay,81.72996194650703,784,0.79,1.55,0.76,-0.3500000000000001,2.6900000000000004,1828,10.909524946287895
@@ -21,7 +15,6 @@ d1_creatinine_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The lowest creatinine concen
 d1_spo2_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The patient's highest peripheral oxygen saturation during the first 24 hours of their unit stay,0.36308920218507734,43,99.0,100.0,1.0,97.5,101.5,9262,10.135697089078572
 temp_apache,HIGH,HIGH_OUTLIER_PERCENT,numeric,The temperature measured during the first 24 hours which results in the highest APACHE III score,4.47919051824714,191,36.2,36.7,0.5,35.45,37.45,8762,10.001712231037041
 d1_lactate_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest lactate concentration for the patient in their serum or plasma during the first 24 hours of their unit stay,74.57612334129294,704,1.2,3.3,2.0999999999999996,-1.9499999999999995,6.449999999999999,2166,9.289359694643393
-gcs_eyes_apache,HIGH,LOW_UNIQUE_VALUES | HIGH_OUTLIER_PERCENT,integer,The eye opening component of the Glasgow Coma Scale measured during the first 24 hours which results in the highest APACHE III score,2.072770490552048,4,3.0,4.0,1.0,1.5,5.5,8274,9.212577383868526
 d1_bilirubin_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The lowest bilirubin concentration of the patient in their serum or plasma during the first 24 hours of their unit stay,58.522783029668645,357,0.4,1.0,0.6,-0.4999999999999999,1.9,3464,9.106203995793901
 bilirubin_apache,HIGH,HIGH_OUTLIER_PERCENT,numeric,The bilirubin concentration measured during the first 24 hours which results in the highest APACHE III score,63.38686990939125,362,0.4,1.1,0.7000000000000001,-0.65,2.1500000000000004,3039,9.050299294201732
 d1_bilirubin_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest bilirubin concentration of the patient in their serum or plasma during the first 24 hours of their unit stay,58.522783029668645,374,0.4,1.1,0.7000000000000001,-0.65,2.1500000000000004,3363,8.840694006309148
@@ -63,7 +56,6 @@ d1_resprate_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,The patient's lowest respirato
 d1_sodium_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The highest sodium concentration for the patient in their serum or plasma during the first 24 hours of their unit stay,11.11619944827887,71,137.0,142.0,5.0,129.5,149.5,4172,5.1178880737996515
 d1_resprate_max,HIGH,HIGH_OUTLIER_PERCENT,numeric,The patient's highest respiratory rate during the first 24 hours of their unit stay,0.4197878163401045,79,22.0,32.0,10.0,7.0,47.0,4638,5.078398738612474
 d1_sysbp_invasive_min,HIGH,HIGH_OUTLIER_PERCENT,numeric,"The patient's lowest systolic blood pressure during the first 24 hours of their unit stay, invasively measured",74.09963691079781,163,80.0,107.0,27.0,39.5,147.5,1202,5.060200387303191
-apache_3j_diagnosis,HIGH,HIGH_OUTLIER_PERCENT,string,The APACHE III-J sub-diagnosis code which best describes the reason for the ICU admission,1.2004841189362467,399,203.01,703.03,500.02,-547.02,1453.06,4575,5.0490001324327904
 glucose_apache,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The glucose concentration measured during the first 24 hours which results in the highest APACHE III score,12.033190496439982,565,97.0,196.0,99.0,-51.5,344.5,3874,4.801864224004363
 h1_arterial_po2_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest arterial partial pressure of oxygen for the patient during the first hour of their unit stay,82.80723561545256,1737,80.7,216.0,135.3,-122.25000000000001,418.95000000000005,743,4.712075088787417
 h1_resprate_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The patient's lowest respiratory rate during the first hour of their unit stay,4.750689651412559,91,14.0,20.0,6.0,5.0,29.0,3986,4.562937863455287
@@ -84,7 +76,6 @@ d1_hco3_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest bicarbonate conc
 sodium_apache,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The sodium concentration measured during the first 24 hours which results in the highest APACHE III score,20.280658140067384,119,135.0,141.0,6.0,126.0,150.0,2775,3.7954946452751224
 d1_diasbp_invasive_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest diastolic blood pressure during the first 24 hours of their unit stay, invasively measured",74.12689585991082,85,39.0,54.0,15.0,16.5,76.5,897,3.7801845842639805
 h1_arterial_ph_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest arterial pH for the patient during the first hour of their unit stay,83.32951708045752,561,7.29,7.41,0.1200000000000001,7.109999999999999,7.59,570,3.7281705801556675
-bmi,MEDIUM,MODERATE_OUTLIER_PERCENT,string,The body mass index of the person on unit admission,3.738837460338229,34888,23.64197531,32.930205695,9.288230384999999,9.709629732500002,46.8625512725,3289,3.7254768701010375
 d1_arterial_ph_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The lowest arterial pH for the patient during the first 24 hours of their unit stay,65.55559190082104,624,7.27,7.4,0.13000000000000078,7.074999999999998,7.5950000000000015,1147,3.6308958531180755
 h1_wbc_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The lowest white blood cell count for the patient during the first hour of their unit stay,82.81595847916871,2072,8.6,16.7,8.1,-3.549999999999999,28.849999999999998,549,3.4835025380710665
 d1_potassium_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest potassium concentration for the patient in their serum or plasma during the first 24 hours of their unit stay,10.451081089921821,100,3.8,4.6,0.7999999999999998,2.6,5.799999999999999,2827,3.442187804402883
@@ -98,9 +89,7 @@ h1_spo2_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The patient's highest periph
 weight,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The weight (body mass) of the person on unit admission,2.965773663493725,3409,66.8,97.1,30.299999999999997,21.35,142.54999999999998,2563,2.8800017978942165
 d1_sodium_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The lowest sodium concentration for the patient in their serum or plasma during the first 24 hours of their unit stay,11.11619944827887,138,135.0,141.0,6.0,126.0,150.0,2340,2.8705316617188843
 d1_platelets_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The lowest platelet count for the patient during the first 24 hours of their unit stay,14.658772475003543,540,138.0,242.0,104.0,-18.0,398.0,2238,2.859369609934968
-arf_apache,MEDIUM,LOW_UNIQUE_VALUES | MODERATE_OUTLIER_PERCENT,binary,"Whether the patient had acute renal failure during the first 24 hours of their unit stay, defined as a 24 hour urine output <410ml, creatinine >=133 micromol/L and no chronic dialysis",0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,2546,2.7978636893118534
 d1_potassium_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The lowest potassium concentration for the patient in their serum or plasma during the first 24 hours of their unit stay,10.451081089921821,116,3.6,4.3,0.6999999999999997,2.5500000000000007,5.35,2156,2.62517046561465
-immunosuppression,MEDIUM,LOW_UNIQUE_VALUES | MODERATE_OUTLIER_PERCENT,binary,"Whether the patient has their immune system suppressed within six months prior to ICU admission for any of the following reasons; radiation therapy, chemotherapy, use of non-cytotoxic immunosuppressive drugs, high dose steroids (at least 0.3 mg/kg/day of methylprednisolone or equivalent for at least 6 months).",0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,2381,2.6165410228796238
 d1_diasbp_noninvasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest diastolic blood pressure during the first 24 hours of their unit stay, non-invasively measured",1.1339722831005419,120,75.0,99.0,24.0,39.0,135.0,2346,2.587319268139358
 d1_diasbp_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest diastolic blood pressure during the first 24 hours of their unit stay, either non-invasively or invasively measured",0.17990906414575905,120,75.0,99.0,24.0,39.0,135.0,2359,2.5767903176475726
 d1_calcium_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest calcium concentration of the patient in their serum during the first 24 hours of their unit stay,14.249888238308635,47,7.9,8.8,0.9000000000000004,6.55,10.150000000000002,1912,2.431208992421545
@@ -114,7 +103,6 @@ h1_diasbp_invasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's hi
 d1_mbp_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest mean blood pressure during the first 24 hours of their unit stay, either non-invasively or invasively measured",0.2398787521943454,125,90.0,116.0,26.0,51.0,155.0,2041,2.2307717530302864
 d1_heartrate_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The patient's lowest heart rate during the first 24 hours of their unit stay,0.15810190485536402,154,60.0,81.0,21.0,28.5,112.5,1984,2.1666957889218943
 d1_mbp_noninvasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest mean blood pressure during the first 24 hours of their unit stay, non-invasively measured",1.612639429524713,122,90.0,116.0,26.0,51.0,155.0,1937,2.1466409557373054
-solid_tumor_with_metastasis,MEDIUM,LOW_UNIQUE_VALUES | MODERATE_OUTLIER_PERCENT,binary,Whether the patient has been diagnosed with any solid tumor carcinoma (including malignant melanoma) which has evidence of metastasis.,0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,1878,2.0637816215741003
 d1_mbp_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest mean blood pressure during the first 24 hours of their unit stay, either non-invasively or invasively measured",0.2398787521943454,91,55.0,75.0,20.0,25.0,105.0,1795,1.961898724492584
 d1_sysbp_noninvasive_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest systolic blood pressure during the first 24 hours of their unit stay, non-invasively measured",1.119797629561785,120,84.0,110.0,26.0,45.0,149.0,1779,1.9617140462695453
 d1_mbp_noninvasive_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest mean blood pressure during the first 24 hours of their unit stay, non-invasively measured",1.612639429524713,91,55.0,75.0,20.0,25.0,105.0,1753,1.942726688387969
@@ -126,19 +114,16 @@ h1_sysbp_invasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's hig
 d1_sysbp_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest systolic blood pressure during the first 24 hours of their unit stay, either non-invasively or invasively measured",0.17336691635864054,120,83.0,110.0,27.0,42.5,150.5,1564,1.7082814513838827
 h1_mbp_noninvasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest mean blood pressure during the first hour of their unit stay, non-invasively measured",9.904811749697426,115,77.0,104.0,27.0,36.5,144.5,1376,1.665274903484249
 d1_heartrate_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The patient's highest heart rate during the first 24 hours of their unit stay,0.15810190485536402,120,87.0,116.0,29.0,43.5,159.5,1460,1.5944434737026034
-cirrhosis,MEDIUM,LOW_UNIQUE_VALUES | MODERATE_OUTLIER_PERCENT,binary,"Whether the patient has a history of heavy alcohol use with portal hypertension and varices, other causes of cirrhosis with evidence of portal hypertension and varices, or biopsy proven cirrhosis. This comorbidity does not apply to patients with a functioning liver transplant.",0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,1428,1.5692652585771116
 h1_sysbp_invasive_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest systolic blood pressure during the first hour of their unit stay, invasively measured",81.68416691199721,168,95.0,133.0,38.0,38.0,190.0,241,1.434694606500774
 h1_heartrate_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The patient's highest heart rate during the first hour of their unit stay,3.0420987210101074,119,77.0,106.0,29.0,33.5,149.5,1232,1.385468326529694
 d1_sysbp_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest systolic blood pressure during the first 24 hours of their unit stay, either non-invasively or invasively measured",0.17336691635864054,143,130.0,164.0,34.0,79.0,215.0,1255,1.370775717063154
 d1_sysbp_noninvasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest systolic blood pressure during the first 24 hours of their unit stay, non-invasively measured",1.119797629561785,143,130.0,164.0,34.0,79.0,215.0,1242,1.3695609024546236
 h1_sysbp_noninvasive_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest systolic blood pressure during the first hour of their unit stay, non-invasively measured",8.004317817539498,149,113.0,150.0,37.0,57.5,205.5,1150,1.3630114255914285
 h1_sysbp_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's highest systolic blood pressure during the first hour of their unit stay, either non-invasively or invasively measured",3.937282609880824,149,113.0,150.0,37.0,57.5,205.5,1199,1.360922567024585
-hepatic_failure,MEDIUM,LOW_UNIQUE_VALUES | MODERATE_OUTLIER_PERCENT,binary,"Whether the patient has cirrhosis and additional complications including jaundice and ascites, upper GI bleeding, hepatic encephalopathy, or coma.",0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,1182,1.2989296468054243
 h1_diasbp_invasive_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest diastolic blood pressure during the first hour of their unit stay, invasively measured",81.69834156553597,86,46.0,65.0,19.0,17.5,93.5,212,1.2630324694667858
 d1_pao2fio2ratio_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest fraction of inspired oxygen for the patient during the first 24 hours of their unit stay,71.97234852201979,5194,192.2857143,365.0,172.7142857,-66.78571425000001,624.0714285500001,309,1.2021007586072747
 h1_diasbp_min,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,"The patient's lowest diastolic blood pressure during the first hour of their unit stay, either non-invasively or invasively measured",3.946005473596982,92,52.0,73.0,21.0,20.5,104.5,1044,1.1850977365087292
 h1_pao2fio2ratio_max,MEDIUM,MODERATE_OUTLIER_PERCENT,numeric,The highest fraction of inspired oxygen for the patient during the first hour of their unit stay,87.44125696466149,3142,142.0,328.0,186.0,-137.0,607.0,120,1.041847542976211
-gcs_unable_apache,LOW,LOW_UNIQUE_VALUES | LOW_OUTLIER_PERCENT,,,1.1307012092069826,2,0.0,0.0,0.0,0.0,0.0,864,0.9528430896819444
 h1_mbp_noninvasive_min,LOW,LOW_OUTLIER_PERCENT,,,9.904811749697426,107,66.0,92.0,26.0,27.0,131.0,787,0.9524501083154825
 h1_pao2fio2ratio_min,LOW,LOW_OUTLIER_PERCENT,,,87.44125696466149,3122,136.0,317.475,181.47500000000002,-136.21250000000003,589.6875,107,0.9289807258204549
 h1_diasbp_noninvasive_min,LOW,LOW_OUTLIER_PERCENT,,,8.014131039220176,93,52.0,74.0,22.0,19.0,107.0,772,0.9150931095385417
@@ -147,30 +132,22 @@ d1_pao2fio2ratio_min,LOW,LOW_OUTLIER_PERCENT,,,71.97234852201979,4990,132.5,300.
 h1_sysbp_noninvasive_min,LOW,LOW_OUTLIER_PERCENT,,,8.004317817539498,143,98.0,134.0,36.0,44.0,188.0,696,0.8249182193144645
 h1_sysbp_min,LOW,LOW_OUTLIER_PERCENT,,,3.937282609880824,142,98.0,134.0,36.0,44.0,188.0,711,0.8070191369094913
 h1_heartrate_min,LOW,LOW_OUTLIER_PERCENT,,,3.0420987210101074,109,69.0,97.0,28.0,27.0,139.0,710,0.7984435972695478
-leukemia,LOW,LOW_UNIQUE_VALUES | LOW_OUTLIER_PERCENT,,,0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,643,0.706608936460142
 height,LOW,LOW_OUTLIER_PERCENT,,,1.454537524669349,401,162.5,177.8,15.300000000000011,139.54999999999998,200.75000000000003,463,0.512287146350369
-lymphoma,LOW,LOW_UNIQUE_VALUES | LOW_OUTLIER_PERCENT,,,0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,376,0.4131958944152619
 age,LOW,LOW_OUTLIER_PERCENT,,,4.610033473989511,74,52.0,75.0,23.0,17.5,109.5,170,0.1943190261187632
-aids,LOW,LOW_UNIQUE_VALUES | LOW_OUTLIER_PERCENT,,,0.7796059446316226,2,0.0,0.0,0.0,0.0,0.0,78,0.08571616958614475
-icu_id,NO_REVIEW,,,,0.0,241,369.0,679.0,310.0,-96.0,1144.0,0,0.0
-hospital_id,NO_REVIEW,,,,0.0,147,47.0,161.0,114.0,-124.0,332.0,0,0.0
-fio2_apache,NO_REVIEW,,,,77.27148822958577,82,0.4,0.85,0.44999999999999996,-0.2749999999999999,1.525,0,0.0
-apache_2_diagnosis,NO_REVIEW,,,,1.8121749370318276,44,113.0,301.0,188.0,-169.0,583.0,0,0.0
-readmission_status,NO_REVIEW,LOW_UNIQUE_VALUES,,,0.0,1,0.0,0.0,0.0,0.0,0.0,0,0.0
 albumin_apache,NO_REVIEW,,,,59.292575752619584,35,2.4,3.4,1.0,0.8999999999999999,4.9,0,0.0
 resprate_apache,NO_REVIEW,,,,1.3455017282173738,74,11.0,36.0,25.0,-26.5,73.5,0,0.0
-ventilated_apache,NO_REVIEW,LOW_UNIQUE_VALUES,,,0.7796059446316226,2,0.0,1.0,1.0,-1.5,2.5,0,0.0
-map_apache,NO_REVIEW,,,,1.0838158167326335,161,54.0,125.0,71.0,-52.5,231.5,0,0.0
+fio2_apache,NO_REVIEW,,,,77.27148822958577,82,0.4,0.85,0.44999999999999996,-0.2749999999999999,1.525,0,0.0
 hematocrit_apache,NO_REVIEW,,,,21.67413561872363,353,28.0,37.9,9.899999999999999,13.150000000000002,52.75,0,0.0
+map_apache,NO_REVIEW,,,,1.0838158167326335,161,54.0,125.0,71.0,-52.5,231.5,0,0.0
 d1_albumin_min,NO_REVIEW,,,,53.53221462606174,35,2.4,3.4,1.0,0.8999999999999999,4.9,0,0.0
 d1_albumin_max,NO_REVIEW,,,,53.53221462606174,35,2.5,3.4,0.8999999999999999,1.1500000000000001,4.75,0,0.0
 d1_hematocrit_max,NO_REVIEW,,,,12.707031718513187,312,30.0,39.0,9.0,16.5,52.5,0,0.0
 d1_hematocrit_min,NO_REVIEW,,,,12.707031718513187,340,28.0,38.0,10.0,13.0,53.0,0,0.0
-d1_hemaglobin_max,NO_REVIEW,,,,13.244578195021425,105,9.8,13.0,3.1999999999999993,5.000000000000002,17.799999999999997,0,0.0
-d1_hemaglobin_min,NO_REVIEW,,,,13.244578195021425,115,9.2,12.6,3.4000000000000004,4.099999999999999,17.7,0,0.0
-h1_hematocrit_min,NO_REVIEW,,,,80.05408175504019,361,28.1,38.1,10.0,13.100000000000001,53.1,0,0.0
-h1_hematocrit_max,NO_REVIEW,,,,80.05408175504019,358,28.9,38.4,9.5,14.649999999999999,52.65,0,0.0
+h1_hemaglobin_min,NO_REVIEW,,,,79.73024543957781,124,9.3,12.7,3.3999999999999986,4.200000000000003,17.799999999999997,0,0.0
+h1_hemaglobin_max,NO_REVIEW,,,,79.73024543957781,124,9.5,12.8,3.3000000000000007,4.549999999999999,17.75,0,0.0
 h1_albumin_max,NO_REVIEW,,,,91.39816601790368,37,2.5,3.6,1.1,0.8499999999999999,5.25,0,0.0
 h1_albumin_min,NO_REVIEW,,,,91.39816601790368,37,2.5,3.6,1.1,0.8499999999999999,5.25,0,0.0
-h1_hemaglobin_max,NO_REVIEW,,,,79.73024543957781,124,9.5,12.8,3.3000000000000007,4.549999999999999,17.75,0,0.0
-h1_hemaglobin_min,NO_REVIEW,,,,79.73024543957781,124,9.3,12.7,3.3999999999999986,4.200000000000003,17.799999999999997,0,0.0
+d1_hemaglobin_max,NO_REVIEW,,,,13.244578195021425,105,9.8,13.0,3.1999999999999993,5.000000000000002,17.799999999999997,0,0.0
+d1_hemaglobin_min,NO_REVIEW,,,,13.244578195021425,115,9.2,12.6,3.4000000000000004,4.099999999999999,17.7,0,0.0
+h1_hematocrit_max,NO_REVIEW,,,,80.05408175504019,358,28.9,38.4,9.5,14.649999999999999,52.65,0,0.0
+h1_hematocrit_min,NO_REVIEW,,,,80.05408175504019,361,28.1,38.1,10.0,13.100000000000001,53.1,0,0.0

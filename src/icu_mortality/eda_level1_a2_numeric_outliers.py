@@ -1,4 +1,4 @@
-"""EDA Level 1 - A.2: Numeric feature outlier analysis."""
+"""EDA Level 1 - A.2: Quantitative numeric feature outlier analysis."""
 
 from __future__ import annotations
 
@@ -46,13 +46,21 @@ KNOWN_IDENTIFIER_COLUMNS = {
 
 
 # ---------------------------------------------------------------------
-# Review thresholds
+# A.2 feature policy
 # ---------------------------------------------------------------------
 
-LOW_UNIQUE_VALUES_THRESHOLD = 10
+# IQR-based outlier detection is intended here for quantitative
+# numerical measurements.
+#
+# Binary, categorical codes and low-cardinality ordinal/discrete
+# variables are excluded because IQR can produce misleading
+# "outliers" for these feature types.
+
+QUANTITATIVE_DICTIONARY_TYPES = {
+    "numeric",
+}
 
 OUTLIER_LOW_THRESHOLD_PERCENT = 1.0
-
 OUTLIER_HIGH_THRESHOLD_PERCENT = 5.0
 
 
@@ -60,10 +68,7 @@ OUTLIER_HIGH_THRESHOLD_PERCENT = 5.0
 # Feature dictionary
 # ---------------------------------------------------------------------
 
-def load_feature_dictionary() -> dict[
-    str,
-    dict[str, str],
-]:
+def load_feature_dictionary() -> dict[str, dict[str, str]]:
     """
     Load feature metadata from the WiDS data dictionary.
 
@@ -103,43 +108,28 @@ def load_feature_dictionary() -> dict[
             f"{sorted(missing_columns)}"
         )
 
-    feature_metadata: dict[
-        str,
-        dict[str, str],
-    ] = {}
+    feature_metadata: dict[str, dict[str, str]] = {}
 
     for _, row in dictionary.iterrows():
 
-        feature = row[
-            "Variable Name"
-        ]
+        feature = row["Variable Name"]
 
         if pd.isna(feature):
             continue
 
         description = (
             ""
-            if pd.isna(
-                row["Description"]
-            )
-            else str(
-                row["Description"]
-            )
+            if pd.isna(row["Description"])
+            else str(row["Description"])
         )
 
         data_type = (
             ""
-            if pd.isna(
-                row["Data Type"]
-            )
-            else str(
-                row["Data Type"]
-            )
+            if pd.isna(row["Data Type"])
+            else str(row["Data Type"]).strip().lower()
         )
 
-        feature_metadata[
-            str(feature)
-        ] = {
+        feature_metadata[str(feature)] = {
             "description": description,
             "data_type": data_type,
         }
@@ -148,16 +138,33 @@ def load_feature_dictionary() -> dict[
 
 
 # ---------------------------------------------------------------------
-# Numeric feature selection
+# Quantitative feature selection
 # ---------------------------------------------------------------------
 
-def get_numeric_features(
+def get_quantitative_numeric_features(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[str, dict[str, str]],
 ) -> list[str]:
     """
-    Return numeric predictor features for A.2 outlier analysis.
+    Return quantitative numeric predictor features suitable for
+    IQR-based outlier analysis.
 
-    Target and known identifiers are excluded.
+    A feature must satisfy both conditions:
+
+    1. It is stored as a numeric dtype in the dataset.
+    2. The WiDS dictionary classifies it as a quantitative numeric
+       variable.
+
+    This intentionally excludes:
+
+    - binary variables
+    - categorical diagnosis codes
+    - ordinal/discrete score variables classified as integer
+    - known identifiers
+    - the target
+
+    The goal is to avoid misleading IQR outlier classifications such
+    as treating the minority value of a binary feature as an outlier.
     """
 
     features: list[str] = []
@@ -172,6 +179,25 @@ def get_numeric_features(
 
         if not is_numeric_dtype(
             dataframe[feature]
+        ):
+            continue
+
+        metadata = feature_metadata.get(
+            feature
+        )
+
+        if metadata is None:
+            continue
+
+        dictionary_data_type = (
+            metadata["data_type"]
+            .strip()
+            .lower()
+        )
+
+        if (
+            dictionary_data_type
+            not in QUANTITATIVE_DICTIONARY_TYPES
         ):
             continue
 
@@ -243,26 +269,17 @@ def calculate_iqr_bounds(
 # ---------------------------------------------------------------------
 
 def assign_review_information(
-    unique_values: int,
     outlier_percent_observed: float,
 ) -> tuple[str, str]:
     """
     Assign A.2 review priority and reason.
 
-    Priority is primarily based on the percentage of observed values
-    classified as IQR outliers.
+    Since A.2 now analyzes only quantitative numeric features,
+    low-cardinality warnings are no longer required here.
 
-    Low-cardinality numeric features are explicitly flagged because
-    IQR-based outlier interpretation may be less meaningful for
-    binary, ordinal or discrete variables.
+    Priority is based on the percentage of observed values classified
+    as IQR outliers.
     """
-
-    reasons: list[str] = []
-
-    if unique_values < LOW_UNIQUE_VALUES_THRESHOLD:
-        reasons.append(
-            "LOW_UNIQUE_VALUES"
-        )
 
     if pd.isna(
         outlier_percent_observed
@@ -274,57 +291,34 @@ def assign_review_information(
 
     if outlier_percent_observed == 0:
 
-        priority = (
-            "NO_REVIEW"
+        return (
+            "NO_REVIEW",
+            "",
         )
 
-    elif (
+    if (
         outlier_percent_observed
         <= OUTLIER_LOW_THRESHOLD_PERCENT
     ):
 
-        priority = (
-            "LOW"
+        return (
+            "LOW",
+            "LOW_OUTLIER_PERCENT",
         )
 
-        reasons.append(
-            "LOW_OUTLIER_PERCENT"
-        )
-
-    elif (
+    if (
         outlier_percent_observed
         <= OUTLIER_HIGH_THRESHOLD_PERCENT
     ):
 
-        priority = (
-            "MEDIUM"
+        return (
+            "MEDIUM",
+            "MODERATE_OUTLIER_PERCENT",
         )
-
-        reasons.append(
-            "MODERATE_OUTLIER_PERCENT"
-        )
-
-    else:
-
-        priority = (
-            "HIGH"
-        )
-
-        reasons.append(
-            "HIGH_OUTLIER_PERCENT"
-        )
-
-    review_reason = (
-        " | ".join(
-            reasons
-        )
-        if reasons
-        else ""
-    )
 
     return (
-        priority,
-        review_reason,
+        "HIGH",
+        "HIGH_OUTLIER_PERCENT",
     )
 
 
@@ -335,13 +329,10 @@ def assign_review_information(
 def analyze_numeric_outliers(
     dataframe: pd.DataFrame,
     feature: str,
-    feature_metadata: dict[
-        str,
-        dict[str, str],
-    ],
+    feature_metadata: dict[str, dict[str, str]],
 ) -> dict[str, object]:
     """
-    Analyze IQR-based outliers for one numeric feature.
+    Analyze IQR-based outliers for one quantitative numeric feature.
     """
 
     series = dataframe[
@@ -412,7 +403,6 @@ def analyze_numeric_outliers(
         review_priority,
         review_reason,
     ) = assign_review_information(
-        unique_values=unique_values,
         outlier_percent_observed=(
             outlier_percent_observed
         ),
@@ -421,17 +411,15 @@ def analyze_numeric_outliers(
     dictionary_data_type = ""
     feature_description = ""
 
-    # Only load descriptive metadata into the table
-    # for features worth manual investigation.
+    # Only display dictionary metadata for features that deserve
+    # manual investigation.
     if review_priority in {
         "MEDIUM",
         "HIGH",
     }:
 
-        metadata = (
-            feature_metadata.get(
-                feature
-            )
+        metadata = feature_metadata.get(
+            feature
         )
 
         if metadata is None:
@@ -447,15 +435,11 @@ def analyze_numeric_outliers(
         else:
 
             dictionary_data_type = (
-                metadata[
-                    "data_type"
-                ]
+                metadata["data_type"]
             )
 
             feature_description = (
-                metadata[
-                    "description"
-                ]
+                metadata["description"]
             )
 
     return {
@@ -502,26 +486,22 @@ def analyze_numeric_outliers(
 
 def build_outlier_summary(
     dataframe: pd.DataFrame,
-    feature_metadata: dict[
-        str,
-        dict[str, str],
-    ],
+    feature_metadata: dict[str, dict[str, str]],
 ) -> pd.DataFrame:
     """
-    Build A.2 outlier summary for all numeric features.
+    Build A.2 outlier summary for quantitative numeric features.
 
     Results are sorted by outlier percentage from highest to lowest.
     """
 
     features = (
-        get_numeric_features(
-            dataframe
+        get_quantitative_numeric_features(
+            dataframe=dataframe,
+            feature_metadata=feature_metadata,
         )
     )
 
-    rows: list[
-        dict[str, object]
-    ] = []
+    rows: list[dict[str, object]] = []
 
     for feature in features:
 
@@ -564,7 +544,7 @@ def save_boxplot(
     feature: str,
 ) -> None:
     """
-    Save a box plot for one numeric feature.
+    Save a box plot for one quantitative numeric feature.
     """
 
     observed = (
@@ -625,14 +605,16 @@ def save_boxplot(
 
 def save_all_boxplots(
     dataframe: pd.DataFrame,
+    feature_metadata: dict[str, dict[str, str]],
 ) -> None:
     """
-    Save box plots for all numeric predictor features.
+    Save box plots only for quantitative numeric predictor features.
     """
 
     features = (
-        get_numeric_features(
-            dataframe
+        get_quantitative_numeric_features(
+            dataframe=dataframe,
+            feature_metadata=feature_metadata,
         )
     )
 
@@ -670,19 +652,19 @@ def print_results(
     results: pd.DataFrame,
 ) -> None:
     """
-    Print A.2 numeric outlier results.
+    Print A.2 quantitative numeric outlier results.
     """
 
     print("=" * 180)
 
     print(
-        "EDA LEVEL 1 — A.2 NUMERIC FEATURE OUTLIERS"
+        "EDA LEVEL 1 — A.2 QUANTITATIVE NUMERIC FEATURE OUTLIERS"
     )
 
     print("=" * 180)
 
     print(
-        f"Numeric features investigated: "
+        f"Quantitative numeric features investigated: "
         f"{len(results)}"
     )
 
@@ -711,7 +693,7 @@ def print_results(
     if results.empty:
 
         print(
-            "No numeric features were found."
+            "No quantitative numeric features were found."
         )
 
     else:
@@ -830,7 +812,8 @@ def run_a2_numeric_outliers() -> pd.DataFrame:
     )
 
     save_all_boxplots(
-        dataframe
+        dataframe=dataframe,
+        feature_metadata=feature_metadata,
     )
 
     print_results(
