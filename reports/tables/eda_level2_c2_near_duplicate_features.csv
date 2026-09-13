@@ -1,0 +1,11 @@
+feature_1,feature_2,correlation,comparable_rows,matching_rows,match_percent,missing_pattern_match_percent
+d1_inr_max,h1_inr_max,1.0,33772,33772,100.0,100.0
+d1_inr_min,h1_inr_min,1.0,33772,33772,100.0,100.0
+paco2_apache,paco2_for_ph_apache,1.0,20845,20845,100.0,100.0
+d1_diasbp_max,d1_diasbp_noninvasive_max,0.9978,90673,90345,99.6383,99.0459
+d1_diasbp_min,d1_diasbp_noninvasive_min,0.9969,90673,90332,99.6239,99.0459
+d1_sysbp_max,d1_sysbp_noninvasive_max,0.9966,90686,90340,99.6185,99.0536
+d1_mbp_min,d1_mbp_noninvasive_min,0.9955,90234,89785,99.5024,98.6272
+h1_sysbp_max,h1_sysbp_noninvasive_max,0.9964,84372,83757,99.2711,95.933
+h1_mbp_min,h1_mbp_noninvasive_min,0.9967,82629,81931,99.1553,95.1534
+d1_sysbp_min,d1_sysbp_noninvasive_min,0.9963,90686,89865,99.0947,99.0536

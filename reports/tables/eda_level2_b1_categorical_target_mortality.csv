@@ -1,0 +1,67 @@
+feature,category,patient_count,death_count,mortality_rate
+apache_2_bodysystem,Respiratory,11609,1301,11.2068
+apache_2_bodysystem,Cardiovascular,38816,4207,10.8383
+apache_2_bodysystem,Haematologic,638,58,9.0909
+apache_2_bodysystem,<MISSING>,1662,136,8.1829
+apache_2_bodysystem,Neurologic,11896,940,7.9018
+apache_2_bodysystem,Gastrointestinal,9026,670,7.423
+apache_2_bodysystem,Trauma,3842,259,6.7413
+apache_2_bodysystem,Renal/Genitourinary,2460,136,5.5285
+apache_2_bodysystem,Undefined Diagnoses,346,18,5.2023
+apache_2_bodysystem,Undefined diagnoses,3768,74,1.9639
+apache_2_bodysystem,Metabolic,7650,116,1.5163
+apache_3j_bodysystem,Sepsis,11740,1854,15.7922
+apache_3j_bodysystem,Respiratory,11609,1301,11.2068
+apache_3j_bodysystem,Hematological,638,58,9.0909
+apache_3j_bodysystem,<MISSING>,1662,136,8.1829
+apache_3j_bodysystem,Cardiovascular,29999,2390,7.9669
+apache_3j_bodysystem,Neurological,11896,940,7.9018
+apache_3j_bodysystem,Gastrointestinal,9026,670,7.423
+apache_3j_bodysystem,Trauma,3842,259,6.7413
+apache_3j_bodysystem,Genitourinary,2172,134,6.1694
+apache_3j_bodysystem,Musculoskeletal/Skin,1166,55,4.717
+apache_3j_bodysystem,Metabolic,7650,116,1.5163
+apache_3j_bodysystem,Gynecological,313,2,0.639
+ethnicity,Hispanic,3796,376,9.9052
+ethnicity,Native American,788,70,8.8832
+ethnicity,Caucasian,70684,6168,8.7262
+ethnicity,Asian,1129,93,8.2374
+ethnicity,Other/Unknown,4374,353,8.0704
+ethnicity,African American,9547,750,7.8559
+ethnicity,<MISSING>,1395,105,7.5269
+gender,<MISSING>,25,8,32.0
+gender,F,42219,3731,8.8373
+gender,M,49469,4176,8.4417
+hospital_admit_source,Step-Down Unit (SDU),1131,213,18.8329
+hospital_admit_source,Other ICU,233,35,15.0215
+hospital_admit_source,Other,7,1,14.2857
+hospital_admit_source,Floor,8055,1118,13.8796
+hospital_admit_source,Other Hospital,1641,222,13.5283
+hospital_admit_source,Acute Care/Floor,1910,201,10.5236
+hospital_admit_source,Direct Admit,6441,661,10.2624
+hospital_admit_source,Emergency Department,36962,3227,8.7306
+hospital_admit_source,ICU,35,3,8.5714
+hospital_admit_source,<MISSING>,21409,1744,8.1461
+hospital_admit_source,ICU to SDU,45,3,6.6667
+hospital_admit_source,Chest Pain Center,134,8,5.9701
+hospital_admit_source,Recovery Room,2896,104,3.5912
+hospital_admit_source,Operating Room,9787,345,3.5251
+hospital_admit_source,PACU,1017,30,2.9499
+hospital_admit_source,Observation,10,0,0.0
+icu_admit_source,Other ICU,859,124,14.4354
+icu_admit_source,Other Hospital,2358,317,13.4436
+icu_admit_source,Floor,15611,2094,13.4136
+icu_admit_source,<MISSING>,112,12,10.7143
+icu_admit_source,Accident & Emergency,54060,4670,8.6385
+icu_admit_source,Operating Room / Recovery,18713,698,3.73
+icu_stay_type,transfer,4970,525,10.5634
+icu_stay_type,readmit,560,50,8.9286
+icu_stay_type,admit,86183,7340,8.5168
+icu_type,MICU,7695,930,12.0858
+icu_type,Cardiac ICU,4776,494,10.3434
+icu_type,Med-Surg ICU,50586,4426,8.7495
+icu_type,Neuro ICU,7675,638,8.3127
+icu_type,CCU-CTICU,7156,542,7.5741
+icu_type,SICU,5209,390,7.487
+icu_type,CTICU,4003,241,6.0205
+icu_type,CSICU,4613,254,5.5062

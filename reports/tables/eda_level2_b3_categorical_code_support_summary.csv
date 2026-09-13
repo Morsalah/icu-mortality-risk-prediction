@@ -1,0 +1,3 @@
+feature,number_of_codes,min_support,q1_support,median_support,q3_support,max_support,codes_support_lt_10,codes_support_lt_50,codes_support_lt_100
+apache_2_diagnosis,44,26,475.25,1366.0,2749.25,11740,0,1,2
+apache_3j_diagnosis,399,1,15.0,45.0,135.0,4481,74,217,272

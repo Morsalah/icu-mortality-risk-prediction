@@ -23,11 +23,11 @@ REPORTS_PATH = Path("reports/tables")
 
 A1_PATH = REPORTS_PATH / "eda_level1_a1_numeric_distribution_summary.csv"
 A2_PATH = REPORTS_PATH / "eda_level1_a2_numeric_outliers_summary.csv"
-A3_PATH = REPORTS_PATH / "eda_level1_a3_numeric_range_summary.csv"
+A3_PATH = REPORTS_PATH / "eda_level1_a3_numeric_suspicious_values_summary.csv"
 A4_PATH = REPORTS_PATH / "eda_level1_a4_numeric_near_constant_summary.csv"
 
 B1_PATH = REPORTS_PATH / "eda_level1_b1_categorical_cardinality_summary.csv"
-B3_PATH = REPORTS_PATH / "eda_level1_b3_categorical_dominance_summary.csv"
+B3_PATH = REPORTS_PATH / "eda_level1_b3_categorical_dominant_category_summary.csv"
 B4_PATH = REPORTS_PATH / "eda_level1_b4_categorical_rare_categories_summary.csv"
 
 
